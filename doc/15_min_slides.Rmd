@@ -1,0 +1,435 @@
+---
+title: "Spike-and-Slab Generalized Additive Models and Fast Algorithms for High-Dimensional Data"
+author: "Boyi Guo"
+institute: |
+  | Department of Biostatistics
+  | University of Alabama at Birmingham
+date: "August 8th, 2021 "
+output: 
+  beamer_presentation:
+    theme: "Szeged"
+    colortheme: "spruce"
+    toc: FALSE
+    number_section: false
+    slide_level: 2
+classoption: "aspectratio=169"
+header-includes:
+  - \usepackage{bm}
+bibliography:
+  - bibliography.bib
+nocite: '@*'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+## target knits Rmds in their own session, so load libraries here.
+# source("here::here(packages.R)")
+```
+
+```{r load-targets, include=FALSE}
+# tar_load(c(target_1, target_2, target_3))
+
+# # If your chunk output is shown in-line, then you'll need to wrap tar_load()
+# # like so:
+# 
+# withr::with_dir(here::here(), {
+#   tar_load(c(target_1, target_2, target_3))
+# })
+# 
+# # This is not needed when using tar_make() to render the document.
+```
+
+\newcommand{\iid}{\overset{\text{i.i.d.}}{\sim}}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+# Outline {.unlisted .unnumbered}
+
+* Background
+
+* Objectives
+
+* Spike-and-slab GAM
+  * Natural parameterization
+  * Spike-and-slab Spline Prior
+  * Algorithms
+  * Simulations
+
+* R packge: \texttt{BHAM}
+
+
+# Background
+
+## Non-linear Effect Modeling
+
+* Simple solutions
+  * Variable categorization
+    * Unrealistic assumption, loss of power
+  * Polynomial regression
+    * Numerically unstable, inflexible
+
+
+* Machine learning methods
+  * Classification and regression tree, random forests, neural network
+  * Lack of interpretation
+  * Hard to extend to high-dimensional setting
+
+## Generalized Additive Model
+
+Firstly proposed by @Hastie1987
+<!-- Who generalized the additive model to accomodate other distribution than gaussian distribution -->
+
+* Formulation
+  $$
+  \begin{aligned}
+    y_i & \iid EF(\mu_i, \phi), \quad i = 1, \dots, n\\
+    \mu_i &= g^{-1}(a + \sum\limits^p_{j=1}f_j(x_{ij}))
+  \end{aligned}
+  $$
+ where $g(\cdot)$ is a known link function, $f_j(\cdot)$ is a smoother function
+ 
+* Objective: to estimate smoother functions $f_j(\cdot)$
+
+* We limit the smoother functions $f_j(x)$ in the class of spline functions
+
+  
+## Smoothing Spline Model
+Given a univariate spline model $y_i \iid N(\boldsymbol\beta^T \bm B(x_i), \sigma^2)$^[Generalizable to GLM], we are interested in estimate $\boldsymbol \beta$ via penalized least square estimation
+$$
+\boldsymbol{\hat \beta} = \text{arg}\min\limits_{\boldsymbol\beta \in \mathbb{R}^K} \sum\limits^n_{i=1} \left[y_i - \boldsymbol\beta^T \bm B(x_i)\right]^2 + \lambda \int f^{''}(\bm X)^2dx
+$$
+
+* Smoothing penalty $\lambda \int f^{''}(X)^2dx = \lambda \beta^TS\beta$
+* The smoothing parameter $\lambda$ is a tuning parameter, selected via cross-validation
+* The matrix $S$ is referred as wiggliness matrix
+  * Given the data matrix $\bm X$, $S$ is known
+  * $S$ differs for different spline representations
+  * $S$ is symmetric and positive semi-definite
+
+
+
+  
+
+## High-dimensional Data Analysis
+
+High-dimensional data analysis refers to the analysis when the number of predictors $p$ is equal or greater than the sample size $n$
+
+* Classic statistics methods are infeasible due to ill-posed model fitting algorithm
+* Conventional solutions
+  * Penalized Models
+    $$Q_{Penalized} (\beta)=(y-\bm X\beta)^T (y-\bm X\beta)+P_\lambda (\beta).$$
+  * Bayesian Hierarchical Models
+    * Spike-and-slab priors
+
+## Spike-and-Slab Priors
+* First coined by @Mitchell1988
+* A mixture distribution conditioning on a latent binary indicator $\gamma \in \{0,1\}$
+  $$\beta|\gamma \sim (1-\gamma)f_{spike}(\beta) + \gamma f_{slab}(\beta)$$
+  * $f_{spike}(x)$: a spike density concentrate around 0 for small effects
+  * $f_{slab}(x)$: a flat density for large effects
+  * $\gamma$ follows a Bernoulli distribution with probability $\theta$
+* Advantages:
+  * Simultaneous variable selection and prediction
+  * Robust estimation
+  * Local adaptive
+* Examples:
+  * Stochastic search variable selection [@George1993]
+  * Spike-and-slab lasso [@Rockova2018]
+
+## HD Spline Model
+* HD Spline model inherits the statistical difficulties from HDA
+  * Function selection instead of variable selection
+  * Computational burden
+* Unique challenges
+  * Balance between smoothing penalty and sparse penalty
+  * Global adaption VS Local adaption 
+  * Grouped nature of spline bases
+  * Linear VS non-linear effect
+* Previous solutions
+  * Grouped Penalized Model
+  * Bayesian Group models
+    * Spike-and-slab normal-mixture-of-inverse gamma prior [@Scheipl2012]
+    * Spike-and-slab group lasso [@Bai2020Spline]
+    
+<!-- TODO: expand the previous solutions session -->
+
+## Objective
+* To develop statistical models that allow non-linear effect modeling in high-dimensional data analysis
+  * Focus on simultaneous variable selection and prediction
+* To develop fast computing algorithms for proposed models
+* To develop statistical software for proposed models <!-- Translational science -->
+
+<!-- In this dissertation, we aim to tackle this problem. Our specific aims of the dissertation include -->
+
+
+# Objectives
+
+# Spike-and-Slab GAM
+
+## Model
+Given the data $\{\bm X_i, y_i\}_{i=1}^n$ where $\bm X_i \in \mathbb{R}^p$ $y_i \in \mathbb{R}$ and $p >> n$, we have the genralized additive model
+$$
+\begin{aligned}
+y_i &\overset{\text{i.i.d.}}{\sim} EF(\mu_i, \phi),\\
+g(\mu_i) &= \sum\limits_{j=1}^p f_j(x_{ij}), \quad i = 1, \dots, n.
+\end{aligned}
+$$
+We express the linear predictor in the matrix form using natural parameterization
+$$
+g(\mu_i) = \sum\limits_{j=1}^p\left[{\beta_j^0}^T X_{ij}^0 + {\beta_j^{pen}}^T X_{ij}^{pen}\right].
+$$
+We propose two sets of spike-and-slab priors
+
+* Mixture normal priors
+* Mixture double exponential priors for ultra-high dimension
+
+## Natural Parameterization
+
+* Linear space of the spline will not be penalized 
+  * the second derivative $x^{''} = 0$^[For simplicity we assume the null space is 1-dimensional. It is trivial to generalized to multi-dimensional]: 
+
+* Eigen-decomposition of $S$
+  * $\bm S = \bm U \bm D \bm U^T$
+  * $U \equiv [\bm U^{pen}: \bm U^0]$ and $\bm D \equiv [\bm D^+: \bm 0]$
+  * $\bm X \bm \beta = \bm X \bm U \bm U^T \bm \beta = X_{0} \beta_0 + X_{pen}\beta_{pen}$
+  * $\boldsymbol \beta^{pen} \sim MVN_{K^*}(\bm 0, \bm I)$^[requires extra step of scaling based on $\bm D^{+}$]
+
+* Benefits
+  * Isolate linear part from the polynomial part of the spline functions
+  * Independent prior for the penalized part
+
+## Mixture Normal Priors
+
+For the coefficients of spline matrices $X_j^0$ and $X_j^\beta$ of the predictor $x_j$ 
+
+$$
+\begin{aligned}
+  \beta^0_{j} |\gamma^0_{j},s_0,s_1 &\sim N(0,(1-\gamma^0_{j}) s_0 + \gamma^0_{j} s_1)\\
+  \beta^{pen}_{jk} | \gamma^{pen}_{j},s_0,s_1 &\sim N(0,(1-\gamma^{pen}_{j}) s_0 + \gamma^{pen}_{j} s_1), k = 1, \dots, K^*_j,\\
+  \gamma_{j}^{0} | \theta^0_j &\sim Bin(\gamma^{0}_{j}|1, \theta^0_j) \\
+\gamma_{j}^{pen} | \theta_j &\sim Bin(\gamma^{pen}_{j}|1, \theta_j),\\
+\theta_j^0 & \sim Beta(a, b) \\
+\theta_j & \sim Beta(a, b).
+\end{aligned}
+$$
+
+
+
+## Mixture Normal Priors
+
+* All coefficients of penalized space $\beta^{pen}_{jk}$ share the same binary indicator $\gamma^{pen}_j$
+
+* Each predictor has two binary indicators $\gamma^0_j$ and $\gamma^{pen}_j$ controlling the inclusion of linear effects and non-linear effects respectively
+  * $\gamma^0_j=1$, $\gamma^{pen}_j=1$: non-linear effect exists
+  * $\gamma^0_j=1$, $\gamma^{pen}_j=0$: only linear effect exists
+  * $\gamma^0_j=0$, $\gamma^{pen}_j=0$: no effects
+
+* $\theta^0_j$ and $\theta_j$ are the corresponding inclusion probability
+  * The hyper-prior of $\theta$s allow for local adaption of shrinkage
+  * $\theta_j$ controls the smoothness of the polynomial function
+  * $\theta_j^0$ controls the sparsity of signals in the model
+
+## Mixture Double Exponential Priors
+Similarly, we replace the mixture normal prior of $\beta$s with the mixture double exponential prior for sparse solution
+$$
+\begin{aligned}
+   \beta^0_{j} |\gamma^0_{j},s_0,s_1 &\sim \color{red}\boxed{DE(0,(1-\gamma^0_{j}) s_0 + \gamma^0_{j} s_1)}\\
+  \beta^{pen}_{jk} | \gamma^{pen}_{j},s_0,s_1 &\sim \color{red}\boxed{DE(0,(1-\gamma^{pen}_{j}) s_0 + \gamma^{pen}_{j} s_1)}\color{black}, k = 1, \dots, K^*_j\\
+  \gamma_{j}^{0} | \theta_j^0 &\sim Bin(\gamma^{0}_{j}|1, \theta_j^0) \\
+\gamma_{j}^{pen} | \theta_j &\sim Bin(\gamma^{pen}_{j}|1, \theta_j),\\
+\theta_j^0 & \sim Beta(a, b) \\
+\theta_j & \sim Beta(a, b).
+\end{aligned}
+$$
+
+
+## Fast Computing Algorithms
+
+We are interested in estimate $\Theta = \{\bm \beta, \bm \theta, \phi\}$
+
+* Prevous Bayesian methods relies on computationally intensive MCMC algorithms
+  * Infeasible in high-dimensional setting
+
+* Fast computing EM-based algorithms are proposed
+  * Previously used in high-dimensional variable selection
+  * Shows great success
+  
+* We expand the algorithms to fit the aforementioned models
+  - EM - Iterative weighted least square
+    - Uncertainty inference
+  - EM - Coordinate descent algorithm
+    - Sparse Solution and faster computation
+
+  
+## EM algorithm
+
+EM algorithm is an iterative algorithm to find local maximum a posterori estimates
+
+- Treat nuisance parameters as "missing values"
+- Calculate the expectation of the posterior density with respect to the missing values
+- Maximize the expectation to estimate the parameters
+- Iterate the process until convergence
+
+## EM algorithm
+We aim to maximize the log posterior density of $\Theta$ by treating binary indivators $\bm \gamma$ as "missing"
+$$
+\begin{aligned}
+& Q(\Theta, \bm \gamma) \equiv \log p(\Theta, \bm \gamma| \textbf{y}, \textbf{X}) \\
+&= \log p(\textbf{y}|\bm \beta, \phi) + \log p(\phi) + \sum\limits_{j=1}^p\left[\log p(\beta^0_j|\gamma^0_j)+\sum\limits_{k=1}^{K_j} \log p(\beta^{pen}_{jk}|\gamma^{pen}_{jk})\right]\\
+& +\sum\limits_{j=1}^{p} \left[ (\gamma^0_j)\log \theta^0_j + (1-\gamma^0_j) \log (1-\theta_j) + (\gamma_{j}^{pen})\log \theta_j + (1-\gamma_{j}^{pen}) \log (1-\theta_j)\right]\\
+& +  \sum\limits_{j=1}^{p}\log p(\theta_j) + \sum\limits_{j=1}^{p}\log p(\theta^0_j)
+\end{aligned}
+$$ 
+
+
+## EM algorithms
+* E-step
+  * Formulate $E_{\bm \gamma|\Theta^{(t)}}\left[Q(\Theta, \bm \gamma)\right]$
+  * Calcualte $E(\gamma^0_{j})$ and $E(\gamma^{pen}_{j})$ by Bayes' theorem
+* M-step: 
+  * maximize $E\left[Q(\Theta, \bm \gamma)\right]$ to find $\Theta^{(t+1)}$
+  $$
+  \hat \Theta^{(t+1)} = \text{argmax}_{\Theta} E\left[Q(\Theta, \bm \gamma)\right]
+  $$
+  
+  * Iterative weighted least square
+  * Coordinate descent
+* Repeat E- and M-steps until convergent
+
+
+## E Step
+We decompose the expected log posterior density to two parts
+$$
+  E\left[Q(\Theta)\right] = E(Q_1) + E(Q_2)
+$$
+where
+$$
+\begin{aligned}
+E(Q_1) &= \log p(\textbf{y}|\bm \beta, \phi) + \log p(\phi) + \sum\limits_{j=1}^p\left[E({S^0_j}^{-1}){\beta^0_j}^2+\sum\limits_{k=1}^{K_j}E(S^{-1}_{j})\beta_{jk}^2\right]\\
+E(Q_2) &= \sum\limits_{j=1}^{p} \left[ E(\gamma_{j}^{0})\log \theta_j^{0} + (1-E(\gamma_{j}^{0})) \log (1-\theta_j^{0})\right] +  \sum\limits_{j=1}^{p}\log p(\theta_j^{0})\\
+&+\sum\limits_{j=1}^{p} \left[ E(\gamma_{j}^{pen})\log \theta_j + (1-E(\gamma_{j}^{pen})) \log (1-\theta_j)\right] +  \sum\limits_{j=1}^{p}\log p(\theta_j)
+\end{aligned}
+$$
+
+## E-step (Cont.)
+We are interested to calculate $p^0_j \equiv E(\gamma_{j}^{0})$, $p_j\equiv E(\gamma_{j}^{pen})$, $E({S^0_j}^{-1})$ and $E(S^{-1}_{j})$ via Bayes' Theorem
+$$
+\begin{aligned}
+p_{j} &= \frac{Pr(\gamma^{pen}_{j} = 1|\theta_j)\prod\limits_{k=1}^{K_j}f(\beta_{jk}|\gamma^{pen}_{j}=1, s_1) }{Pr(\gamma^{pen}_{j} = 1|\theta_j)\prod\limits_{k=1}^{K_j}f(\beta_{jk}|\gamma^{pen}_{j}=1, s_1) + Pr(\gamma^{pen}_{j} = 0|\theta_j)\prod\limits_{k=1}^{K_j}f(\beta_{jk}|\gamma^{pen}_{j}=0, s_0)}.
+\end{aligned}
+$$
+Similarly, we have  can have $p^0_j$ and 
+$$
+\begin{aligned}
+E({S^0_j}^{-1}) &= E\left[(1-\gamma^{0}_{j}) s_0 + \gamma^{0}_{j} s_1\right] =  \frac{1-p^{0}_{j}}{s_0} + \frac{p^{0}_{j}}{s_1}\\
+E(S^{-1}_{j}) &= \frac{1-p_{j}}{s_0} + \frac{p_{j}}{s_1}.
+\end{aligned}
+$$
+
+## M Step
+
+We maximize $E(Q_1)$ and $E(Q_2)$ separately 
+
+* Maximize $E(Q_1)$ for $\boldsymbol \beta, \phi$
+  * Iterative weighted least square algorithm
+  
+* Maximize $E(Q_2)$ for $\boldsymbol \theta$
+  * Beta conjugate prior
+  * Closed form solution
+  $$
+  \begin{aligned}
+    \theta^0_j &= \frac{p^0_j + a - 1 }{a + b-1} & 
+    \theta_j &= \frac{p_j + a - 1 }{a + b-1}\\
+  \end{aligned}
+  $$
+
+
+
+## EM - Iterative Weighted Least Square
+
+  - Update $\bm \beta$ by maximizing the linear approximation to the normal likelihood using weighted least square [@Yi2012].
+ 
+  Equivalently, running the augmented weighted normal linear regression
+  $$
+  z_{*} \approx N(X_*\beta, \phi\Sigma_*),
+  $$
+  where $z_* = \begin{pmatrix}z \\ 0\end{pmatrix}$, $X_* = \begin{pmatrix}X \\ I_{p+1}\end{pmatrix}$, $\Sigma_* = diag(w_1^{-1}, \dots, w_n^{-1}, \tau_0^2/\phi, \dots, \tau_p^2/\phi)$
+
+
+
+## EM - Coordinate Descent
+ 
+ When using mixture double exponential prior, $E(Q_1)$ can be written as a $L_1$ penalized likelihood function
+
+$$
+E(Q_1) = \log p(\textbf{y}|\bm \beta, \phi) + \log p(\phi) + \sum\limits_{j=1}^p\left[E({S^0_j}^{-1})|\beta^0_j|+\sum\limits_{k=1}^{K_j}E(S^{-1}_{j})|\beta_{jk}|\right],
+$$
+
+The log likelihood function can be easily solved using coordinate descent algorithm.
+
+
+
+## Tuning Parameter Selection
+* $s_0$ and $s_1$ are tuning parameters
+* Empirically, $s_1$ have extremely small effect on changing the estimates
+* Focusing on tuning $s_0$
+* Instead of the 2-D grid, We consider a sequence of $L$ ordered values $\{s_0^l\}: 0 < s_0^1 < s_0^2 < \dots < s_0^L < s_1$
+* Cross-validation to choose optimal value for $s_0$
+
+## Simulation Study
+* Follow the logistic regression simulation introduced in @Bai2020Spline. 
+* $n_{train} = 500$, $n_{test}=1000$
+* $p=4, 10, 50$
+
+$$
+\log(\frac{\mathbb{E}(Y)}{1-\mathbb{E}(Y)}) = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
+$$
+
+* $f_j(x_j) = 0$ for $j = 5, \dots, p$.
+* 200 Iterations
+* Splines are constructed using cubic spline with 25 knots
+
+## Metric
+* Area under the curve
+* Misclassification rate
+* MSE
+$$
+\text{MSE} = n_{train}^{-1}\sum^{n_{train}}_{i=1}(y_{i,new}-\hat y_{i,new})^2.
+$$
+
+## Performance
+
+```{r eval = F}
+glm_spline_pred_dat <-readr::read_rds("Simulation_Result/predict_res.rds")
+
+glm_spline_pred_dat$auc %>% 
+        select(-c(n_train, n_test, "bglm_t", "bglm_de", "blasso")) %>% 
+        kable(col.names = c("p", "mgcv", "Mixture Normal", "Mixture DE", "EM-CD"),
+              caption = "Averaged AUC of out-of-bag samples")
+# %>%
+  #set_caption(caption = "Averaged AUC of out-of-bag samples",
+              #autonum = run_autonum(seq_id = "tab", bkm="sim_GAM_AUC", pre_label = "Table "))
+```
+
+## Reproducibility
+
+<details><summary>Reproducibility receipt</summary>
+
+```{r}
+## datetime
+Sys.time()
+
+## repository
+if(requireNamespace('git2r', quietly = TRUE)) {
+  git2r::repository()
+} else {
+  c(
+    system2("git", args = c("log", "--name-status", "-1"), stdout = TRUE),
+    system2("git", args = c("remote", "-v"), stdout = TRUE)
+  )
+}
+
+## session info
+sessionInfo()
+```
+
+</details>
