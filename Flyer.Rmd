@@ -1,0 +1,48 @@
+---
+title: "Spike-and-Slab Generalized Additive Models and Fast Algorithms for High-Dimensional Data"
+author: "Boyi Guo and Nengjun Yi"
+institute: |
+  | Department of Biostatistics
+  | University of Alabama at Birmingham
+date: "August 8th, 2021 "
+output: 
+  beamer_presentation:
+    theme: "Szeged"
+    colortheme: "spruce"
+    toc: FALSE
+    number_section: false
+    slide_level: 1
+    includes:
+      in_header: "preamble.tex"
+classoption: "aspectratio=169"
+bibliography:
+  - bibfile.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+## target knits Rmds in their own session, so load libraries here.
+# source("here::here(packages.R)")
+```
+
+
+# Spike-and-Slab Generalized Additive Models and Fast Algorithms for High-Dimensional Data
+* Balanced sparse penalty and smooth penalty for improved curve interpolation
+
+
+* Bi-level selection for flexible linear and non-linear effect interpoluation
+
+
+* Optimization-based algorithms for fast computation and scalability
+  
+  * EM-Iterative Weighted Least Square algorithm allows uncertainty inference
+  
+  * Accommodates other priors: Bayesian ridge, lasso priors; spike-and-slab priors for non-sparse problems
+
+* R package \texttt{BHAM}
+  - Fit high-dimensional generalized additive model
+  - Customizable smoothing functions, covariate adjustment without penalty
+  - Ancillary functions for model set-up, summary, prediction
+  - Website via [_boyiguo1.github.io/BHAM_](https://boyiguo1.github.io/BHAM/)
+
+
