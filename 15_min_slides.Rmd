@@ -1,6 +1,6 @@
 ---
 title: "Spike-and-Slab Generalized Additive Models and Fast Algorithms for High-Dimensional Data"
-author: "Boyi Guo"
+author: "Boyi Guo and Nengjun Yi"
 institute: |
   | Department of Biostatistics
   | University of Alabama at Birmingham
@@ -30,21 +30,21 @@ knitr::opts_chunk$set(echo = FALSE)
 # Outline {.unlisted .unnumbered}
 
 * Background
+  * Challenges in higher dimensional additive models
 
 * Objectives
 
 * Bayesian Hierarchical Additive Model
-  * Natural parameterization
   * Spike-and-slab Spline Prior
   * EM algorithms
   
-* Numeric Study
+* Numeric Studies
 
 * Conclusion
 
 # Background
 
-## Non-linear Effect Interpolation
+## Curve Interpolation
 
 * Traditional modeling approach
   * Categorization of continuous variable
@@ -57,14 +57,13 @@ knitr::opts_chunk$set(echo = FALSE)
   * Accurate but too complicated for interpretation
 
 ## Generalized Additive Model
-
 Firstly formalized by @Hastie1987
 \begin{gather*}
   y_i \iid EF(\mu_i, \phi), \quad i = 1, \dots, n\\
   \mu_i = g^{-1}(a + \sum\limits^p_{j=1}f_j(x_{ij}))
 \end{gather*}
-where $g(\cdot)$ is a link function, $f_j(\cdot)$ is a smoother function
- 
+where $g(\cdot)$ is a link function, $\phi$ is the dispersion parameter
+
 * Objective: to estimate smoothing functions $f_j(\cdot)$
 * Applications:
   * Dose-response curve
@@ -78,12 +77,12 @@ where $g(\cdot)$ is a link function, $f_j(\cdot)$ is a smoother function
 * Bayesian Hierarchical Models
   * Grouped spike-and-slab priors [@Scheipl2012; @Yang2020], grouped spike-and-slab lasso prior[@Bai2020; @Bai2021]
   * Mostly Markov chain Monte Carlo methods for model fitting
-  * Computational inefficiency causes scalability problem for high-dimensional data analysis
+  * Computational inefficiency causes scaling problems in high-dimensional data analysis
   
 ## Other challenges
 * Bi-level selection
+  * To identify linear- and non-linear effects
   * All-in-all-out selection reduces the ability of result interpretation
-  * Improved interpretation by identifying linear- and non-linear effects
   
 * Uncertainty measures
   * Penalized models doesn't provide uncertainty measures
@@ -91,13 +90,12 @@ where $g(\cdot)$ is a link function, $f_j(\cdot)$ is a smoother function
 
 
 ## Objectives
-* To develop statistical models that improve non-linear effect interpolation in high-dimensional data analysis
+* To develop statistical models that improve curve interpolation in high-dimensional data analysis
   * Local adaption of sparse penalty and smooth penalty
-  * Bi-level selection for linear- and non-linear effect interpolation
-* To develop fast computing and scalable algorithms for the proposed models
+  * Bi-level selection for linear- and non-linear effect
+* To develop fast and scalable algorithms
   * Uncertainty measures 
-* To develop user-friendly statistical software for the proposed models
-  * R package \texttt{BHAM}
+* To develop user-friendly statistical softwares
 
 # Bayesian Hierarchical Additive Model (BHAM)
 ## Model
@@ -122,7 +120,7 @@ $$
 $$
 * Re-parameterization based on eigen-decomposition of $S_j$
   * $\bm S = \bm U \bm D \bm U^T$
-  * $U \equiv [\bm U^\tp : \bm U^0]$ and $\bm D \equiv [\bm D^\tp : \bm 0]$
+  * $\bm U \equiv [\bm U^\tp : \bm U^0]$ and $\bm D \equiv [\bm D^\tp : \bm 0]$
   * $\bm X \bm \beta = \bm X \bm U \bm U^T \bm \beta = X^{0} \beta^0 + \bs X^\tp\beta^\tp$
 
 * Benefits
@@ -240,28 +238,6 @@ $$
   * Closed form calculation via $E(Q_2)$ to update $\theta$
 <!-- * Repeat E- and M-steps until convergent -->
 
-## EM - Coordinate Descent
- 
- When using mixture double exponential prior, $E(Q_1)$ can be written as a $L_1$ penalized likelihood function
-  $$
-  E(Q_1) = \log p(\textbf{y}|\bm \beta, \phi) + \log p(\phi) + \sum\limits_{j=1}^p\left[E({S^0_j}^{-1})|\beta^0_j|+\sum\limits_{k=1}^{K_j}E(S^{-1}_{j})|\beta_{jk}|\right],
-  $$
-The log likelihood function can be easily solved using coordinate descent algorithm.
-
-## EM - Iterative Weighted Least Square
-
-  - Maximize the normal likelihood based on linear approximation using weighted least square [@Yi2012].
- 
-  Equivalently, running the augmented weighted normal linear regression
-  $$
-  z_{*} \approx N(X_*\beta, \phi\Sigma_*),
-  $$
-  where $z_* = \begin{pmatrix}z \\ 0\end{pmatrix}$, $X_* = \begin{pmatrix}X \\ I_{p+1}\end{pmatrix}$, $\Sigma_* = diag(w_1^{-1}, \dots, w_n^{-1}, \tau_0^2/\phi, \dots, \tau_p^2/\phi)$
-
-- Can fit model with other priors
-  - $t$ prior, double exponential prior, mixture $t$ prior, mixture $DE$ prior
-  - Works great for low and medium dimension problems
-
 ## Tuning Parameter Selection
 * $s_0$ and $s_1$ are tuning parameters
 * Empirically, $s_1$ has extremely small effect on changing the estimates
@@ -274,7 +250,7 @@ The log likelihood function can be easily solved using coordinate descent algori
 * $n_{train} = 500$, $n_{test}=1000$
 * $p=4, 10, 50, 200$
 $$
-\log(\frac{\mathbb{E}(Y)}{1-\mathbb{E}(Y)}) = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
+\mu = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
 $$
 
 * $f_j(x_j) = 0$ for $j = 5, \dots, p$.
