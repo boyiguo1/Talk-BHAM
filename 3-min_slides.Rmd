@@ -43,28 +43,27 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # Bayesian Hierarchical Additive Model
 * Re-parameterization of smoothing function design matrix
-  * Eigen-decompose the smoothing matrix of a smoothing function
+  * Eigen-decompose the smoothing penalty matrix of a smoothing function
   * Deploy smoothing penalty on the smoothing function
   * Isolate the linear and polynomial spaces of a smoothing function
   
 * Two-part spike-and-slab lasso prior
-  * Independent SS-Lasso priors of linear and polynomial spaces for sparse solution
+  * Independent SS-Lasso priors on linear and polynomial spaces
   * Two latent indicator variables for bi-level selection
-  * Hyperpior of latent indicator variables for local adoptation
+  * Hyperpior of latent indicator variables for local adaptation
 
 # Optimization Algorithms
 
 * EM algorithms 
-* Combine with coordinate descent algorithm for fast computating and sparse solution
+* Combine with coordinate descent algorithm for fast computing and sparse solution
 * Combine with iterative weighted least square for uncertainty measures
-  * Accomodate other pirors: Bayesian ridge, lasso priors, spike-and-slab priors
+  * Accommodate other priors: Bayesian ridge, lasso priors, spike-and-slab priors
 
 # Software Support
 
 * R package: \texttt{BHAM}
   - Ancillary functions for setting up high-dimensional spline formulation
-  - Model summary and variable selection
-  - Curve plotting
+  - Model summary, variable selection, and curve plotting
   - Covariate adjustment without penalty
   - Website via [_boyiguo1.github.io/BHAM_](https://boyiguo1.github.io/BHAM/)
 
