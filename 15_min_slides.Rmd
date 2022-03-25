@@ -268,31 +268,26 @@ $$
   * mgcv [@Wood2004]
   * COSSO [@Zhang2006GAM] and adaptive COSSO[@Storlie2011]
   * Sparse Bayesian GAM [@Bai2021]
-  * spikeSlabGAM [TODO: add ]
+  * spikeSlabGAM [@Scheipl2012]
 
 * Metrics
   * Prediction: $R^2$ for continuous outcomes, out-of-sample AUC for binary outcomes
-  * Variable Selection Performance: 
+  * Variable Selection Performance: positive predictive value (precision), true positive rate (recall), and Matthews correlation coefficient (MCC)
   
-## Simulation Results
+## Prediction Performance
 
-* The proposed method works better in low, medium, high settings than other state-of-art methods
-* SB-GAM works better in ultra-high setting
+* LASSO performs bad and mgcv performs well
+* BHAM performs better than COSSO, adaptive COSSO and spikeSlabGAM
+* BHAM performs better than SB-GAM in low-dimensional case but slightly worse in the high-dimensional case
+* BHAM is much fater than SB-GAM in fitting models
 
-\begin{tabular}{r|l|l|l|l|l|l}
-\hline
-p & EM-IWLS & EM-CD & COSSO & ACOSSO & mgcv & SB-GAM\\
-\hline
-4 & \textbf{0.94 (0.01)} & 0.89 (0.04) & 0.90 (0.02) & 0.90 (0.02) & 0.94 (0.01) & 0.93 (0.01)\\
-\hline
-10 & \textbf{0.93 (0.01)} & 0.87 (0.03) & 0.87 (0.03) & 0.85 (0.03) & 0.92 (0.04) & 0.92 (0.01)\\
-\hline
-50 & \textbf{0.92 (0.01)} & 0.87 (0.02) & 0.83 (0.02) & 0.83 (0.02) & 0.76 (0.04) & 0.92 (0.01)\\
-\hline
-200 & 0.88 (0.01) & 0.86 (0.02) & 0.81 (0.06) & 0.81 (0.08) & - & \textbf{0.92 (0.01)}\\
-\hline
-\end{tabular}  
-  
+## Variable Performance
+* SB-GAM has the best variable selection performance
+* BHAM has conservative selection
+* BHAM and spikeSlabGAM have trade-offs for bi-level selection
+  * spikeSlabGAM tends to select either linear or nonlinear components of the funciton
+  * BHAM is more likely to select both parts
+
   
 # Conclusion
 
@@ -304,7 +299,6 @@ p & EM-IWLS & EM-CD & COSSO & ACOSSO & mgcv & SB-GAM\\
 - R package: \texttt{BHAM}
   - Ancillary functions for high-dimensional formulation
   - Model summary and variable selection
-  - Covariate adjustment without penalty
   - Website via [_boyiguo1.github.io/BHAM_](https://boyiguo1.github.io/BHAM/)
 
 # References {.allowframebreaks}
