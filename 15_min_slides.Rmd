@@ -1,10 +1,10 @@
 ---
-title: "Spike-and-Slab Generalized Additive Models and Fast Algorithms for High-Dimensional Data"
+title: "Spike-and-Slab LASSO Generalized Additive Models and Fast Algorithms for High-Dimensional Data Analysis"
 author: "Boyi Guo and Nengjun Yi"
 institute: |
   | Department of Biostatistics
   | University of Alabama at Birmingham
-date: "August 8th, 2021 "
+date: "March 28th, 2022 "
 output: 
   beamer_presentation:
     theme: "Szeged"
@@ -30,13 +30,14 @@ knitr::opts_chunk$set(echo = FALSE)
 # Outline {.unlisted .unnumbered}
 
 * Background
-  * Challenges in higher dimensional additive models
+  * Review of generalize additive model
+  * Challenges in higher dimensional additive model
 
 * Objectives
 
 * Bayesian Hierarchical Additive Model
-  * Spike-and-slab Spline Prior
-  * EM algorithms
+  * Two-part Spike-and-slab LASSO Prior for Smoothing Functions
+  * EM-Coordinate Descent algorithm
   
 * Numeric Studies
 
@@ -44,103 +45,108 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # Background
 
-## Curve Interpolation
+## Non-linear Effect Modeling
 
-* Traditional modeling approach
-  * Categorization of continuous variable
-  * Polynomial regression
+> "It is extremely unlikely that the true (effect) function f(X) (_on the outcome_) is actually linear in X."
+\hspace*{2cm}
+
+> --- @hastie2009elements PP. 139
+
+* Traditional modeling approaches
+  * Categorization of continuous variable, polynomial regression
   * Simple but may be statistically flawed
 
 * Machine learning methods
-  * Random forests, neural network
-  * Black-box algorithms
-  * Accurate but too complicated for interpretation
+  * Black-box algorithms: Random forests, neural network
+  * Predict accurate but too complicated for interpretation
 
 ## Generalized Additive Model
 Firstly formalized by @Hastie1987
-\begin{gather*}
-  y_i \iid EF(\mu_i, \phi), \quad i = 1, \dots, n\\
-  \mu_i = g^{-1}(a + \sum\limits^p_{j=1}f_j(x_{ij}))
-\end{gather*}
-where $g(\cdot)$ is a link function, $\phi$ is the dispersion parameter
-
-* Objective: to estimate smoothing functions $f_j(\cdot)$
-* Applications:
+\begin{align*}
+  y_i \simiid EF(\mu_i, \phi), \quad i = 1, \dots, n\\
+  \mu_i = g^{-1}(\beta_0 + \sum\limits^p_{j=1}B_j(x_j))
+\end{align*}
+where $B_j(x_j)$ is a smoothing function, $g(\cdot)$ is a link function, $\phi$ is the dispersion parameter
+* Objective: to estimate smoothing functions $B_j(x_j)$
+* Applications in biomedical research:
   * Dose-response curve
   * Time-varying effect
 
 ## High-dimensional GAM
 * Grouped penalty models
   * Grouped lasso penalty [@Ravikumar2009; @Huang2010], grouped SCAD penalty [@Wang2007; @Xue2009]
-  * Sparse penalty induces excess shrinkage, causing inaccurate interpolation of non-linear effect
+  * Sparse penalty induces __excess shrinkage__, causing inaccurate interpolation of non-linear effect
 
 * Bayesian Hierarchical Models
   * Grouped spike-and-slab priors [@Scheipl2012; @Yang2020], grouped spike-and-slab lasso prior[@Bai2020; @Bai2021]
   * Mostly Markov chain Monte Carlo methods for model fitting
-  * Computational inefficiency causes scaling problems in high-dimensional data analysis
+  * Computational inefficiency causes __scaling problems__ in high-dimensional data analysis
   
 ## Other challenges
 * Bi-level selection
-  * To identify linear- and non-linear effects
+  * To detect a smoothing function is linear and nonlinear effects
   * All-in-all-out selection reduces the ability of result interpretation
   
-* Uncertainty measures
+* Uncertainty inferences
   * Penalized models doesn't provide uncertainty measures
-  * Bayesian models with MCMC algorithms are not scalable enough
+  * Challenging to estimate the effective degree of freedom for each smoothing functions
 
 
 ## Objectives
-* To develop statistical models that improve curve interpolation in high-dimensional data analysis
+* To develop statistical models that improve curve interpolation and outcome predicting
   * Local adaption of sparse penalty and smooth penalty
-  * Bi-level selection for linear- and non-linear effect
-* To develop fast and scalable algorithms
-  * Uncertainty measures 
-* To develop user-friendly statistical softwares
+  * Bi-level selection for linear and nonlinear effect
+* To develop a fast and scalable algorithm
+* To implement a user-friendly statistical software
 
 # Bayesian Hierarchical Additive Model (BHAM)
 ## Model
 Given the data $\{\bm X_i, y_i\}_{i=1}^n$ where $\bm X_i \in \mathbb{R}^p$, $y_i \in \mathbb{R}$ and $p >> n$, we have the generalized additive model
-$$
-\begin{aligned}
+\begin{align*}
 y_i &\overset{\text{i.i.d.}}{\sim} EF(\mu_i, \phi),\\
-g(\mu_i) &= \sum\limits_{j=1}^p f_j(X_{ij}), \quad i = 1, \dots, n.
-\end{aligned}
-$$
-We express smoothing functions in the matrix form using reparameterization
-$$
-g(\mu_i) = \sum\limits_{j=1}^p f_j(X_{ij}) = \sum\limits_{j=1}^p\left[{\beta_j^0}^T X_{ij}^0 + {\beta_j^{pen}}^T X_{ij}^{pen}\right].
-$$
+g(\mu_i) &= g^{-1}(\beta_0 + \sum\limits^p_{j=1}B_j(x_j)) , \quad i = 1, \dots, n.
+\end{align*}
+The smoothing function can be written in a matrix form $B_j(x_j) = \bs \beta_j^T \bs X_j$, where $\bs \beta_j$ are the coefficients of the smoothing function and $\bs X_j$ is the basis matrix of dimension $K_j$.
 
-## Reparameterization
+<!-- We express smoothing functions in the matrix form: linear component $X_{ij}^0$, nonlinear component $X_{ij}^{pen}$ and their coefficients $\beta_{j}^0, \beta^{pen}_j$ respectively. -->
+<!-- $$ -->
+<!-- g(\mu_i) = \sum\limits_{j=1}^p f_j(X_{ij}) = \sum\limits_{j=1}^p\left[{\beta_j^0}^T X_{ij}^0 + {\beta_j^{pen}}^T X_{ij}^{pen}\right]. -->
+<!-- $$ -->
 
-* Introduced in @Wood2011
-* Smoothing penalty
+## Smoothing Function Reparameterization
+* Smoothing penalty from Smoothing spline regression [@Wood2017]
 $$
-\lambda_j \int f^{\prime\prime}_j(x)dx = \lambda_j \bs \beta_j^T \bs S_j \bs \beta_j 
+\lambda_j \int B^{\prime\prime}_j(x)dx = \lambda_j \bs \beta_j^T \bs S_j \bs \beta_j,
 $$
-* Re-parameterization based on eigen-decomposition of $S_j$
-  * $\bm S = \bm U \bm D \bm U^T$
-  * $\bm U \equiv [\bm U^\tp : \bm U^0]$ and $\bm D \equiv [\bm D^\tp : \bm 0]$
-  * $\bm X \bm \beta = \bm X \bm U \bm U^T \bm \beta = X^{0} \beta^0 + \bs X^\tp\beta^\tp$
+where $S_j$ is a known smoothing penalty matrix.
+
+* Isolate the linear and nonlinear componentsvia eigendecomposing $S_j$
+  <!-- * $\bm S = \bm U \bm D \bm U^T$ -->
+  <!-- * $\bm U \equiv [\bm U^\tp : \bm U^0]$ and $\bm D \equiv [\bm D^\tp : \bm 0]$ -->
+   $$\bm X \bm \beta = X^{0} \beta + \bs X^\tp\beta^\tp$$
 
 * Benefits
-  * Isolate linear parts from the polynomial parts of smoothing functions
-  * Independent prior for the penalized part
+  * Motivate bi-level selection
+  * Implicit modeling of function smoothness
+  * Reduce computation load with conditionally independent prior of basis coefficients 
 
 
-## Spike-and-slab Spline Prior
+## Two-part Spike-and-slab LASSO (SSL) Prior
 
-We propose a two-part spike-and-slab lasso prior, mixture double exponential prior 
+* SSL prior for linear coefficients and group SSL priors for nonlinear coefficients
 \begin{align*}
-\beta^0_{j} |\gamma^0_{j},s_0,s_1 &\sim DE(0,(1-\gamma^0_{j}) s_0 + \gamma^0_{j} s_1),\\
-\beta^\tp_{jk} | \gamma^\tp_{j},s_0,s_1 &\sim DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1), \\
-\gamma_{j}^{0} | \theta_j &\sim Bin(\gamma^{0}_{j}|1, \theta_j),\\
-\gamma_{j}^\tp | \theta_j &\sim Bin(\gamma^\tp_{j}|1, \theta_j),\\
-\theta_j &\sim \text{Beta}(a,b)
+\beta_{j} |\gamma_{j},s_0,s_1 &\sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1) \\
+\beta^\tp_{jk} | \gamma^\tp_{j},s_0,s_1 &\simiid DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1), k = 1, \dots, K_j
 \end{align*}
-
-$\bs \beta_j$ for curve interpolation, $\gamma_j^0, \gamma_j^\tp$ for bi-level selection, $\theta_j$ for local adaption
-
+* Effect hierarchy enforced latent inclusion indicators $\gamma_j$ and $\gamma^\tp_{j}$ for bi-level selection
+$$
+\gamma_{j} | \theta_j \sim Bin(\gamma_{j}|1, \theta_j),\quad
+\gamma_{j}^\tp | \bg{\gamma_{j}}, \theta_j \sim Bin(1, \bg{\gamma_{j}}\theta_j),
+$$
+* Local adaptivity of signal sparsity and function smoothness
+$$
+\theta_j \sim \text{Beta}(a,b)
+$$
 
 ## Visual Representation
 \begin{figure}
@@ -155,25 +161,26 @@ background/.style={rectangle, fill=gray!10,inner sep=0.2cm, rounded corners=5mm}
 ]
 
 \matrix (linearPrior) [matrix of nodes, column sep = 0mm, row sep = 0.7cm] {
-  \node (linearGamma) [outCome] { $\gamma_j^0 \sim Bin(1, \theta_j) $ };\\
-  \node (linearBeta) [outCome] { $\beta_j^0 \sim DE(0,(1-\gamma^0_{j}) s_0 + \gamma^0_{j} s_1)$};\\
+  \node (linearGamma) [outCome] { $\gamma_j \sim Bin(1, \theta_j) $ };\\
+  \node (linearBeta) [outCome] { $\beta_j \sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1)$};\\
 };
 \matrix (penPrior) [right = 2cm of linearPrior, matrix of nodes, column sep = 0mm, row sep = 0.7cm] {
-  \node (penGamma) [outCome] { $\gamma_{j}^\tp \sim Bin(1, \theta_j)$ };\\
-  \node (penBeta) [outCome] { $\beta_{jk}^\tp \sim  DE(0,(1-\gamma^0_{j}) s_0 + \gamma^0_{j} s_1)$};\\
+  \node (penGamma) [outCome] { $\gamma_{j}^\tp \sim Bin(1, \bg{\gamma_{j}}\theta_j)$ };\\
+  \node (penBeta) [outCome] { $\beta_{jk}^\tp \sim  DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1)$};\\
 };
 
 
 \node (s) [staticCompo]  at ($(linearBeta)!0.5!(penBeta)$)  {($s_0, s_1$)};
-\node (Beta) [staticCompo, below = 1cm of s] {$\bs \beta = (\beta^0_1, \bs \beta^\tp_1, \dots,\beta^0_j, \bs \beta^\tp_j , \dots,\beta^0_p, \bs \beta^\tp_p) $};
+\node (Beta) [staticCompo, below = 1cm of s] {$\bs \beta = (\beta_1, \bs \beta^\tp_1, \dots,\beta_j, \bs \beta^\tp_j , \dots,\beta_p, \bs \beta^\tp_p) $};
 \node (Theta)[outCome, above = 2cm of s] {$\theta_{j} \sim Beta(a, b)$};
 \node (ab)[staticCompo, above = 0.5cm of Theta] {$(a, b)$};
-\node (Y) [outCome, below = 1cm of Beta] {$y_i \sim Expo. Fam. (g(\eta_i))$};
+\node (Y) [outCome, below = 1cm of Beta] {$y_i \sim Expo. Fam. (g^{-1}(\bs \beta^T \bs X_i), \phi)$};
 
 \draw[->] (Theta) -- (linearGamma);
 \draw[->] (Theta) -- (penGamma);
 \draw[->] (linearGamma) -- (linearBeta) ;
 \draw[->] (penGamma) -- (penBeta);
+\draw[->, draw = red] (linearGamma) -- (penGamma);
 \draw[->] (ab) -- (Theta);
 \draw[->] (s) -- (linearBeta) ;
 \draw[->] (s) -- (penBeta);
@@ -185,10 +192,10 @@ background/.style={rectangle, fill=gray!10,inner sep=0.2cm, rounded corners=5mm}
 \begin{pgfonlayer}{background}
   \node [background,
    fit=(linearGamma) (linearBeta),
-   label=above:Null Space:] {};
+   label=above:Linear Space:] {};
   \node [background,
     fit=(penGamma) (penBeta),
-    label=above:Penalized Space:] {};
+    label=above:Nonlinear Space:] {};
 \end{pgfonlayer}
 
 \end{tikzpicture}
@@ -196,53 +203,49 @@ background/.style={rectangle, fill=gray!10,inner sep=0.2cm, rounded corners=5mm}
 \end{figure}
 
 
-# Fast Computing Algorithms
-## Fast Computing Algorithms
+## EM-Cooridante Descent Algrithm for Scalable Model Fitting
 
-We are interested in estimate $\Theta = \{\bm \beta, \bm \theta, \phi\}$
+We are interested in estimating $\Theta = \{\bm \beta, \bm \theta, \phi\}$ using optimization based algorithm for scalability purpose
 
-* Two optimization based algorithms are proposed
-  - EM - Coordinate descent algorithm
-    - Sparse Solution and faster computation
-  - EM - Iterative weighted least square
-    - Uncertainty inference
-
-* Successful history in high-dimensional data analysis
+* Basic Ideas
+  * Treat $\gamma$s as the "missing data" in the EM procedure
+  * Quantify the expectation of log posterior density function of $\Theta$ with respect to $\gamma$ conditioning on $\Theta^{(t-1)}$
+  * Maximize the independent parts of the objective function using Coordinate Descent algorithm and closed-form equations
+  
+* Previous applications in high-dimensional data analysis
   * EMVS [@Rockova2014a], Spike-and-slab lasso [@Rockova2018]
   * BhGLM [@Yi2019]
 
 
-<!-- TODO: continue here -->
 
-## EM algorithm
+## Decomposition of Objective Function
 We aim to maximize the log posterior density of $\Theta$ by averaging over all possible values of $\bm \gamma$
-$$
-\begin{aligned}
-& Q(\Theta, \bm \gamma) \equiv \log p(\Theta, \bm \gamma| \textbf{y}, \textbf{X}) \\
-&= \log p(\textbf{y}|\bs \beta, \phi) + \log p(\phi) + \sum\limits_{j=1}^p\left[\log p(\beta^0_j|\gamma^0_j)+\sum\limits_{k=1}^{K_j} \log p(\beta^{pen}_{jk}|\gamma^{pen}_{jk})\right]\\
-& +\sum\limits_{j=1}^{p} \left[ (\gamma^0_j+\gamma_{j}^{pen})\log \theta_j + (2-\gamma^0_j-\gamma_{j}^{pen}) \log (1-\theta_j)\right] +  \sum\limits_{j=1}^{p}\log p(\theta_j)
-\end{aligned}
-$$
+$$ \log f(\Theta, \bs \gamma| \textbf{y}, \textbf{X}) = Q_1(\bs \beta, \phi) + Q_2 (\bs \gamma,\bs \theta),$$
 
-## EM algorithms
+* L$_1$-penalized likelihood function of $\bs \beta, \phi$
+$$Q_1 \equiv Q_1(\bs \beta, \phi) = \log f(\textbf{y}|\bs \beta, \phi) + \sum\limits_{j=1}^p\left[\log f(\beta_j|\gamma_j)+\sum\limits_{k=1}^{K_j} \log f(\beta^{\tp}_{jk}|\gamma^{\tp}_{jk})\right]$$
+* Posterior density of $\theta$ given data points $\gamma$s
+$$Q_2 \equiv Q_2(\bs\gamma,\bs\theta) = \sum\limits_{j=1}^{p} \left[ (\gamma_j+\gamma_{j}^{\tp})\log \theta_j + (2-\gamma_j-\gamma_{j}^{\tp}) \log (1-\theta_j)\right] +  \sum\limits_{j=1}^{p}\log f(\theta_j).$$
+
+* $Q_1$ and $Q_2$ are independent conditional on $\gamma$s
+
+
+## Summary of EM-Coordinate Descent Algorithm
 * E-step
   * Formulate $E_{\bm \gamma|\Theta^{(t)}}\left[Q(\Theta, \bm \gamma)\right] = E(Q_1) + E(Q_2)$
     * $E(Q_1)$ is a penalized likelihood function of $\beta, \phi$
     * $E(Q_2)$ is a posterior density of $\theta$ given $E(\gamma)$
     * $E(Q_1)$ and $E(Q_2)$ are conditionally independent
-  * Calculate $E(\gamma^0_{j})$ and $E(\gamma^{pen}_{j})$, and penalties by Bayes' theorem
+  * Calculate $E(\gamma_{j})$, $E(\gamma^\tp_{j})$ and the penalties parameters by Bayes' theorem
 * M-step: 
-  * Use algorithms to fit penalized model in $E(Q_1)$to update $\beta, \phi$ 
-    * Coordinate descent
-    * Iterative weighted least square
+  * Use Coordinate Descent to fit the penalized model in $E(Q_1)$ to update $\beta, \phi$ 
   * Closed form calculation via $E(Q_2)$ to update $\theta$
-<!-- * Repeat E- and M-steps until convergent -->
 
 ## Tuning Parameter Selection
 * $s_0$ and $s_1$ are tuning parameters
 * Empirically, $s_1$ has extremely small effect on changing the estimates
 * Focus on tuning $s_0$
-* Instead of the 2-D grid, We consider a sequence of $L$ ordered values $\{s_0^l\}: 0 < s_0^1 < s_0^2 < \dots < s_0^L < s_1$
+* Consider a sequence of $L$ ordered values $\{s_0^l\}: 0 < s_0^1 < s_0^2 < \dots < s_0^L < s_1$
 * Cross-validation to choose optimal value for $s_0$
 
 # Simulation Study
@@ -260,16 +263,18 @@ $$
 
 ## Comparison & Metircs
 * Methods of comparison
-  * Proposed model with EM-CD and EM-IWLS
+  * Proposed model BHAM
+  * Linear LASSO model as the benchmark
   * mgcv [@Wood2004]
   * COSSO [@Zhang2006GAM] and adaptive COSSO[@Storlie2011]
   * Sparse Bayesian GAM [@Bai2021]
+  * spikeSlabGAM [TODO: add ]
 
 * Metrics
-  * out-of-sample $R^2$ for continuous outcomes
-  * out-of-sample AUC for binary outcomes
+  * Prediction: $R^2$ for continuous outcomes, out-of-sample AUC for binary outcomes
+  * Variable Selection Performance: 
   
-## Out-of-sample AUC
+## Simulation Results
 
 * The proposed method works better in low, medium, high settings than other state-of-art methods
 * SB-GAM works better in ultra-high setting
@@ -291,7 +296,7 @@ p & EM-IWLS & EM-CD & COSSO & ACOSSO & mgcv & SB-GAM\\
   
 # Conclusion
 
-- Proposed fast and scalable high dimensional GAM
+- Propose a scalable Bayesian Hierarchical Additive Model (BHAM) for high-dimensional data analysis
   - Organic balance between sparse penalty and smooth penalty
   - Bi-level selection for linear- and non-linear effects
   - Uncertainty measures provided
