@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 * Background
   * Review of generalize additive model
-  * Challenges in higher dimensional additive model
+  * Challenges in high dimensional additive model
 
 * Objectives
 
@@ -45,7 +45,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # Background
 
-## Non-linear Effect Modeling
+## Nonlinear Effect Modeling
 
 > "It is extremely unlikely that the true (effect) function f(X) (_on the outcome_) is actually linear in X."
 \hspace*{2cm}
@@ -60,13 +60,14 @@ knitr::opts_chunk$set(echo = FALSE)
   * Black-box algorithms: Random forests, neural network
   * Predict accurate but too complicated for interpretation
 
-## Generalized Additive Model
-Firstly formalized by @Hastie1987
+## Generalized Additive Model (GAM)
+Firstly formulated by @Hastie1987
 \begin{align*}
   y_i \simiid EF(\mu_i, \phi), \quad i = 1, \dots, n\\
   \mu_i = g^{-1}(\beta_0 + \sum\limits^p_{j=1}B_j(x_j))
 \end{align*}
 where $B_j(x_j)$ is a smoothing function, $g(\cdot)$ is a link function, $\phi$ is the dispersion parameter
+
 * Objective: to estimate smoothing functions $B_j(x_j)$
 * Applications in biomedical research:
   * Dose-response curve
@@ -75,7 +76,7 @@ where $B_j(x_j)$ is a smoothing function, $g(\cdot)$ is a link function, $\phi$ 
 ## High-dimensional GAM
 * Grouped penalty models
   * Grouped lasso penalty [@Ravikumar2009; @Huang2010], grouped SCAD penalty [@Wang2007; @Xue2009]
-  * Sparse penalty induces __excess shrinkage__, causing inaccurate interpolation of non-linear effect
+  * Sparse penalty induces __excess shrinkage__, causing inaccurate interpolation of nonlinear effect
 
 * Bayesian Hierarchical Models
   * Grouped spike-and-slab priors [@Scheipl2012; @Yang2020], grouped spike-and-slab lasso prior[@Bai2020; @Bai2021]
@@ -84,7 +85,7 @@ where $B_j(x_j)$ is a smoothing function, $g(\cdot)$ is a link function, $\phi$ 
   
 ## Other challenges
 * Bi-level selection
-  * To detect a smoothing function is linear and nonlinear effects
+  * To detect if a smoothing function is linear and nonlinear
   * All-in-all-out selection reduces the ability of result interpretation
   
 * Uncertainty inferences
@@ -93,7 +94,7 @@ where $B_j(x_j)$ is a smoothing function, $g(\cdot)$ is a link function, $\phi$ 
 
 
 ## Objectives
-* To develop statistical models that improve curve interpolation and outcome predicting
+* To develop statistical models that improve curve interpolation and outcome prediction
   * Local adaption of sparse penalty and smooth penalty
   * Bi-level selection for linear and nonlinear effect
 * To develop a fast and scalable algorithm
@@ -120,7 +121,7 @@ $$
 $$
 where $S_j$ is a known smoothing penalty matrix.
 
-* Isolate the linear and nonlinear componentsvia eigendecomposing $S_j$
+* Isolate the linear and nonlinear components via eigendecomposing $S_j$
   <!-- * $\bm S = \bm U \bm D \bm U^T$ -->
   <!-- * $\bm U \equiv [\bm U^\tp : \bm U^0]$ and $\bm D \equiv [\bm D^\tp : \bm 0]$ -->
    $$\bm X \bm \beta = X^{0} \beta + \bs X^\tp\beta^\tp$$
@@ -133,7 +134,7 @@ where $S_j$ is a known smoothing penalty matrix.
 
 ## Two-part Spike-and-slab LASSO (SSL) Prior
 
-* SSL prior for linear coefficients and group SSL priors for nonlinear coefficients
+* SSL prior for the linear coefficient and group SSL priors for nonlinear coefficients
 \begin{align*}
 \beta_{j} |\gamma_{j},s_0,s_1 &\sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1) \\
 \beta^\tp_{jk} | \gamma^\tp_{j},s_0,s_1 &\simiid DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1), k = 1, \dots, K_j
@@ -210,7 +211,7 @@ We are interested in estimating $\Theta = \{\bm \beta, \bm \theta, \phi\}$ using
 * Basic Ideas
   * Treat $\gamma$s as the "missing data" in the EM procedure
   * Quantify the expectation of log posterior density function of $\Theta$ with respect to $\gamma$ conditioning on $\Theta^{(t-1)}$
-  * Maximize the independent parts of the objective function using Coordinate Descent algorithm and closed-form equations
+  * Maximize the independent parts of the objective function using Coordinate Descent algorithm and closed-form calculation
   
 * Previous applications in high-dimensional data analysis
   * EMVS [@Rockova2014a], Spike-and-slab lasso [@Rockova2018]
@@ -276,12 +277,12 @@ $$
   
 ## Prediction Performance
 
-* LASSO performs bad and mgcv performs well
+* Linear LASSO Model performs bad and mgcv performs well
 * BHAM performs better than COSSO, adaptive COSSO and spikeSlabGAM
 * BHAM performs better than SB-GAM in low-dimensional case but slightly worse in the high-dimensional case
-* BHAM is much fater than SB-GAM in fitting models
+* BHAM is much faster than SB-GAM in fitting models
 
-## Variable Performance
+## Variable Selection Performance
 * SB-GAM has the best variable selection performance
 * BHAM has conservative selection
 * BHAM and spikeSlabGAM have trade-offs for bi-level selection
@@ -293,8 +294,7 @@ $$
 
 - Propose a scalable Bayesian Hierarchical Additive Model (BHAM) for high-dimensional data analysis
   - Organic balance between sparse penalty and smooth penalty
-  - Bi-level selection for linear- and non-linear effects
-  - Uncertainty measures provided
+  - Bi-level selection for linear and nonlinear effects
 
 - R package: \texttt{BHAM}
   - Ancillary functions for high-dimensional formulation
