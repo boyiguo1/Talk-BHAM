@@ -211,7 +211,7 @@ We are interested in estimating $\Theta = \{\bm \beta, \bm \theta, \phi\}$ using
 * Basic Ideas
   * Treat $\gamma$s as the "missing data" in the EM procedure
   * Quantify the expectation of log posterior density function of $\Theta$ with respect to $\gamma$ conditioning on $\Theta^{(t-1)}$
-  * Maximize the independent parts of the objective function using Coordinate Descent algorithm and closed-form calculation
+  * Maximize two  parts of the objective function independently
   
 * Previous applications in high-dimensional data analysis
   * EMVS [@Rockova2014a], Spike-and-slab lasso [@Rockova2018]
@@ -228,7 +228,7 @@ $$Q_1 \equiv Q_1(\bs \beta, \phi) = \log f(\textbf{y}|\bs \beta, \phi) + \sum\li
 * Posterior density of $\theta$ given data points $\gamma$s
 $$Q_2 \equiv Q_2(\bs\gamma,\bs\theta) = \sum\limits_{j=1}^{p} \left[ (\gamma_j+\gamma_{j}^{\tp})\log \theta_j + (2-\gamma_j-\gamma_{j}^{\tp}) \log (1-\theta_j)\right] +  \sum\limits_{j=1}^{p}\log f(\theta_j).$$
 
-* $Q_1$ and $Q_2$ are independent conditional on $\gamma$s
+* $Q_1$ and $Q_2$ are independent conditioning on $\gamma$s
 
 
 ## Summary of EM-Coordinate Descent Algorithm
@@ -273,13 +273,13 @@ $$
 
 * Metrics
   * Prediction: $R^2$ for continuous outcomes, out-of-sample AUC for binary outcomes
-  * Variable Selection Performance: positive predictive value (precision), true positive rate (recall), and Matthews correlation coefficient (MCC)
+  * Variable Selection: positive predictive value (precision), true positive rate (recall), and Matthews correlation coefficient (MCC)
   
 ## Prediction Performance
 
 * Linear LASSO Model performs bad and mgcv performs well
 * BHAM performs better than COSSO, adaptive COSSO and spikeSlabGAM
-* BHAM performs better than SB-GAM in low-dimensional case but slightly worse in the high-dimensional case
+* BHAM performs better than SB-GAM in low-dimensional case but slightly worse in the high-dimensional setting
 * BHAM is much faster than SB-GAM in fitting models
 
 ## Variable Selection Performance
