@@ -36,7 +36,7 @@ knitr::opts_chunk$set(echo = FALSE)
     * Bayesian Variable Selection
 * Dissertation
     * Two-part Spike-and-slab LASSO Prior for Spline Functions
-    * Fast and Scalable Model Fitting Algorithms
+    * EM-Coordinate Descent Algorithms
     * Empirical Performance of Prediction & Selection
 * Future Research
     * Structured Additive Regression with Spike-and-Slab LASSO prior
@@ -46,10 +46,6 @@ knitr::opts_chunk$set(echo = FALSE)
 # Background
 
 ## Spline Model Development
-
-
-
-### Nonlinear Effect Modeling
 
 > "It is extremely unlikely that the true (effect) function f(X) (_on the outcome_) is actually linear in X."
 \hspace*{2cm}
@@ -64,262 +60,158 @@ knitr::opts_chunk$set(echo = FALSE)
   * Black-box algorithms: Random forests, neural network
   * Predict accurate but too complicated for interpretation
 
-### Generalized Additive Model (GAM)
-Firstly formulated by @Hastie1987
-\begin{align*}
-  y_i \simiid EF(\mu_i, \phi), \quad i = 1, \dots, n\\
-  \mu_i = g^{-1}(\beta_0 + \sum\limits^p_{j=1}B_j(x_j))
-\end{align*}
-where $B_j(x_j)$ is a smoothing function, $g(\cdot)$ is a link function, $\phi$ is the dispersion parameter
+### Spline Functions
 
-* Objective: to estimate smoothing functions $B_j(x_j)$
-* Applications in biomedical research:
-  * Dose-response curve
-  * Time-varying effect
+::: columns
+:::: column
+
+A _spline_ function is a piece-wise polynomial function
+$$
+B(x) = \sum\limits_{k = 1}^K \beta_k b_k(x) \equiv  \bs X^T \bs \beta
+$$
+$b_k(x)$ are the _basis functions_, possibly truncated power basis and b-spline basis.
+::::
+
+:::: column
+\centering
+![A cubic spline function with 2 knots (courtesy of @hastie2009elements)](spline_visual.jpg){height=60%}
+::::
+:::
+
+We defer more information about spline functions to @Wood2017
+
+We assume the knots of the functions are equidistance.
+
+
+### Generalized Additive Models with Splines
+
+__Generalized additive model__ [@Hastie1987] is expressed
+\begin{align*}
+  y_i &\simiid EF(\mu_i, \phi), \quad i = 1, \dots, n\\
+  g(\mu_i) &= \beta_0 + B(x_i) = \beta_0 + \bs X_i^T \bs \beta ,  \quad \mathbb{E}\left[B(X)\right] = 0 
+\end{align*}
+where $B(x_i)$ is the spline function, $g(\cdot)$ is a link function, $\phi$ is the dispersion parameter
+
+\vspace*{0.5cm}
+
+* Model fitting follows the generalized linear models, e.g. ordinary least square for Gaussian outcome
+$$
+\boldsymbol{\hat \beta} = \text{arg}\min \sum\limits^n_{i=1} \left[y_i - \beta_0 - \bs X_i^T \bs \beta \right]^2
+$$
+
+### Problem: Function Smoothness
+
+The estimation of $B(X)$ can be wiggly when the underlying function is smooth, particularly as the number of bases ,$K$, increases. 
+
+[TODO: add two plots, overfitting and not overfitting]
 
 ## Bayesian Regularization
 
+### Smoothing Spline Model
+
+* Smoothing penalty $\lambda \int B^{''}(X)^2dx = \lambda \bs \beta^T \bs S \bs\beta$
+  * The smoothing penalty matrix $\bs S$ is known given $\bs X$
+  * $\bs S$ is symmetric and positive semi-definite
+
+* Penalized Least Square for Gaussian Outcome
+$$
+\boldsymbol{\hat \beta} = \text{arg}\min \sum\limits^n_{i=1} \sum\limits^n_{i=1} \left[y_i - \beta_0 - \bs X_i^T \bs \beta \right]^2 + \lambda \bs \beta^T \bs S \bs\beta
+$$
+
+* The smoothing parameter $\lambda$ is a tuning parameter, selected via cross-validation
+
+### Problem: Multiple Predictor Model
+
+When a model contains multiple spline functions for variables $X_1, \dots, X_p$, the penalized least square estimator is
+$$
+\boldsymbol{\hat \beta} = \text{arg}\min \sum\limits^n_{i=1} \sum\limits^n_{i=1} \left[y_i - \beta_0 - \sum\limits \bs X_{ij}^T \bs \beta_j \right]^2 + \lambda_j \bs \beta_j^T \bs S_j \bs\beta_j
+$$
+
+_How to decide $\lambda_i$?_
+
+* Global smoothing, i.e. $\lambda_1 = \cdots =\lambda_p$ assumes all functions shares the same shape
+* Adaptive smoothing, i.e. examining $\lambda_i$ combination, are computationally intensive
+
+### Bayesian Regularization
+
+* Bayesian Regularization is the Bayesian analogy of penalized models by using regularizing priors
+  * Bayesian ridge via normal prior
+  $$
+   \beta \sim N(0, \tau^2) \rightarrow  \lambda = \sigma^2/\tau^2
+  $$
+  
+* Adaptive shrinkage with hierarchical priors
+  $$
+   \tau^2_j \simiid IG(a, b)
+  $$
+  * Adaptive Smoothing
+    * Random walk prior on b-spline bases with IG hyperprior
+    * Normal prior on truncated power bases with a log-normal spline model for variance
+
 ## Bayesian Variable Selection
+### Problem: Functional Selection
+In the context of variable selection and high-dimensional statistics, we always assume some variables are not effective or predictive to the outcome.
 
-### High-dimensional GAM
-* Grouped penalty models
-  * Grouped lasso penalty [@Ravikumar2009; @Huang2010], grouped SCAD penalty [@Wang2007; @Xue2009]
-  * Sparse penalty induces __excess shrinkage__, causing inaccurate interpolation of nonlinear effect
+How to statistically detect
 
-* Bayesian Hierarchical Models
-  * Grouped spike-and-slab priors [@Scheipl2012; @Yang2020], grouped spike-and-slab lasso prior[@Bai2020; @Bai2021]
-  * Mostly Markov chain Monte Carlo methods for model fitting
-  * Computational inefficiency causes __scaling problems__ in high-dimensional data analysis
+* if a variable is predictive to the outcome, $B_j(X_j) = 0$
+* if a variable has a nonlinear relationship with the outcome, $B_j(X_j) = \beta_j X_j$
+
+_Bi-level selection_ is the procedure that simultaneously addresses the two questions above
+
+
+### Spike-and-Slab Priors
+Spike-and-slab priors are a family of mixture distributions that deploys a characterizing structure
+  $$\beta|\gamma \sim (1-\gamma)f_{spike}(\beta) + \gamma f_{slab}(\beta)$$
+
+  * Latent indicator $\gamma$ follows a Bernoulli distribution with probability $\theta$
+  * Spike density $f_{spike}(x)$ concentrates around 0 for small effects
+  * Slab density $f_{slab}(x)$ is a flat density for large effects
   
-### Other challenges
-* Bi-level selection
-  * To detect if a smoothing function is linear and nonlinear
-  * All-in-all-out selection reduces the ability of result interpretation
+* Natural procedure to select variables via posterior distribution of $\gamma$
+* Markov chain Monte Carlo is not compelling for high-dimensional data analysis
+
+### Spike-and-Slab LASSO Priors
+* Double exponential distributions as the spike and slab distributions
+  $$\beta|\gamma \sim (1-\gamma)DE(0, s_0) + \gamma DE(0, s_1), 0 < s_0 < s_1$$
+  * Seamless variable selection as coefficients shrinkage to 0
+  * Computation advantages via Expectation-Maximization (EM) algorithms
   
-* Uncertainty inferences
-  * Penalized models doesn't provide uncertainty measures
-  * Challenging to estimate the effective degree of freedom for each smoothing functions
+* Group spike-and-slab LASSO
+  * Structure underlying predictors, e.g. gene pathways, bases of a spline function
+  * Structured prior on $\gamma$
+  $$
+  \gamma_k | \theta_j ~ Binomial(1, \theta_j), k \in j
+  $$
 
+### Problem: High-dimensional Spline Model
 
+How to jointly model signal sparsity and function smoothness, while capable of bi-level selection?
 
+* Excess shrinkage due to ignoring smooth penalty completely
+    * Group lasso penalty [@Ravikumar2009; @Huang2010], group SCAD penalty [@Wang2007; @Xue2009]
+    * Global penalty VS adaptive penalty
+
+* All-in-all-out selection
+    * Can not detect if a function is linear, e.g. spike-and-slab grouped LASSO prior [@Bai2020; @Bai2021]
+    * Failed to select function as whole, e.g. group spike-and-slab LASSO prior
+
+* Computational prohibitive algorithms
+    * MCMC algorithms doesn't scale well for high-dimensional models [@Scheipl2012]
 
 # Dissertation
-Scope of this dissertation
 
-* BHAM
-* Survival Model
-* R package `BHAM`
-
-## Objectives
+### Objectives
 * To develop statistical models that improve curve interpolation and outcome prediction
   * Local adaption of sparse penalty and smooth penalty
   * Bi-level selection for linear and nonlinear effect
 * To develop a fast and scalable algorithm
 * To implement a user-friendly statistical software
 
-### Model
-Given the data $\{\bm X_i, y_i\}_{i=1}^n$ where $\bm X_i \in \mathbb{R}^p$, $y_i \in \mathbb{R}$ and $p >> n$, we have the generalized additive model
-\begin{align*}
-y_i &\overset{\text{i.i.d.}}{\sim} EF(\mu_i, \phi),\\
-g(\mu_i) &= g^{-1}(\beta_0 + \sum\limits^p_{j=1}B_j(x_j)) , \quad i = 1, \dots, n.
-\end{align*}
-The smoothing function can be written in a matrix form $B_j(x_j) = \bs \beta_j^T \bs X_j$, where $\bs \beta_j$ are the coefficients of the smoothing function and $\bs X_j$ is the basis matrix of dimension $K_j$.
-
-<!-- We express smoothing functions in the matrix form: linear component $X_{ij}^0$, nonlinear component $X_{ij}^{pen}$ and their coefficients $\beta_{j}^0, \beta^{pen}_j$ respectively. -->
-<!-- $$ -->
-<!-- g(\mu_i) = \sum\limits_{j=1}^p f_j(X_{ij}) = \sum\limits_{j=1}^p\left[{\beta_j^0}^T X_{ij}^0 + {\beta_j^{pen}}^T X_{ij}^{pen}\right]. -->
-<!-- $$ -->
-
-### Smoothing Function Reparameterization
-* Smoothing penalty from Smoothing spline regression [@Wood2017]
-$$
-\lambda_j \int B^{\prime\prime}_j(x)dx = \lambda_j \bs \beta_j^T \bs S_j \bs \beta_j,
-$$
-where $S_j$ is a known smoothing penalty matrix.
-
-* Isolate the linear and nonlinear components via eigendecomposing $S_j$
-  <!-- * $\bm S = \bm U \bm D \bm U^T$ -->
-  <!-- * $\bm U \equiv [\bm U^\tp : \bm U^0]$ and $\bm D \equiv [\bm D^\tp : \bm 0]$ -->
-   $$\bm X \bm \beta = X^{0} \beta + \bs X^\tp\beta^\tp$$
-
-* Benefits
-  * Motivate bi-level selection
-  * Implicit modeling of function smoothness
-  * Reduce computation load with conditionally independent prior of basis coefficients 
-
-
-### Two-part Spike-and-slab LASSO (SSL) Prior
-
-* SSL prior for the linear coefficient and group SSL priors for nonlinear coefficients
-\begin{align*}
-\beta_{j} |\gamma_{j},s_0,s_1 &\sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1) \\
-\beta^\tp_{jk} | \gamma^\tp_{j},s_0,s_1 &\simiid DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1), k = 1, \dots, K_j
-\end{align*}
-* Effect hierarchy enforced latent inclusion indicators $\gamma_j$ and $\gamma^\tp_{j}$ for bi-level selection
-$$
-\gamma_{j} | \theta_j \sim Bin(\gamma_{j}|1, \theta_j),\quad
-\gamma_{j}^\tp | \bg{\gamma_{j}}, \theta_j \sim Bin(1, \bg{\gamma_{j}}\theta_j),
-$$
-* Local adaptivity of signal sparsity and function smoothness
-$$
-\theta_j \sim \text{Beta}(a,b)
-$$
-
-### Visual Representation
-\begin{figure}
-\centering
-\resizebox{12cm}{5.5cm}{
-\begin{tikzpicture} [
-staticCompo/.style = {rectangle, minimum width=1cm, minimum height=1cm,text centered, draw=black, fill=blue!30},
-outCome/.style={ellipse, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=blue!30},
-mymatrix/.style={matrix of nodes, nodes=outCome, row sep=1em},
-PriorBoarder/.style={rectangle, minimum width=5cm, minimum height=10cm, text centered, fill=lightgray!30},
-background/.style={rectangle, fill=gray!10,inner sep=0.2cm, rounded corners=5mm}
-]
-
-\matrix (linearPrior) [matrix of nodes, column sep = 0mm, row sep = 0.7cm] {
-  \node (linearGamma) [outCome] { $\gamma_j \sim Bin(1, \theta_j) $ };\\
-  \node (linearBeta) [outCome] { $\beta_j \sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1)$};\\
-};
-\matrix (penPrior) [right = 2cm of linearPrior, matrix of nodes, column sep = 0mm, row sep = 0.7cm] {
-  \node (penGamma) [outCome] { $\gamma_{j}^\tp \sim Bin(1, \bg{\gamma_{j}}\theta_j)$ };\\
-  \node (penBeta) [outCome] { $\beta_{jk}^\tp \sim  DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1)$};\\
-};
-
-
-\node (s) [staticCompo]  at ($(linearBeta)!0.5!(penBeta)$)  {($s_0, s_1$)};
-\node (Beta) [staticCompo, below = 1cm of s] {$\bs \beta = (\beta_1, \bs \beta^\tp_1, \dots,\beta_j, \bs \beta^\tp_j , \dots,\beta_p, \bs \beta^\tp_p) $};
-\node (Theta)[outCome, above = 2cm of s] {$\theta_{j} \sim Beta(a, b)$};
-\node (ab)[staticCompo, above = 0.5cm of Theta] {$(a, b)$};
-\node (Y) [outCome, below = 1cm of Beta] {$y_i \sim Expo. Fam. (g^{-1}(\bs \beta^T \bs X_i), \phi)$};
-
-\draw[->] (Theta) -- (linearGamma);
-\draw[->] (Theta) -- (penGamma);
-\draw[->] (linearGamma) -- (linearBeta) ;
-\draw[->] (penGamma) -- (penBeta);
-\draw[->, draw = red] (linearGamma) -- (penGamma);
-\draw[->] (ab) -- (Theta);
-\draw[->] (s) -- (linearBeta) ;
-\draw[->] (s) -- (penBeta);
-\draw[->] (linearBeta) -- (Beta);
-\draw[->] (penBeta) -- (Beta);
-\draw[->] (Beta) --  (Y);
-
-
-\begin{pgfonlayer}{background}
-  \node [background,
-   fit=(linearGamma) (linearBeta),
-   label=above:Linear Space:] {};
-  \node [background,
-    fit=(penGamma) (penBeta),
-    label=above:Nonlinear Space:] {};
-\end{pgfonlayer}
-
-\end{tikzpicture}
-}
-\end{figure}
-
-
-## EM-Cooridante Descent Algrithm for Scalable Model Fitting
-
-We are interested in estimating $\Theta = \{\bm \beta, \bm \theta, \phi\}$ using optimization based algorithm for scalability purpose
-
-* Basic Ideas
-  * Treat $\gamma$s as the "missing data" in the EM procedure
-  * Quantify the expectation of log posterior density function of $\Theta$ with respect to $\gamma$ conditioning on $\Theta^{(t-1)}$
-  * Maximize two  parts of the objective function independently
-  
-* Previous applications in high-dimensional data analysis
-  * EMVS [@Rockova2014a], Spike-and-slab lasso [@Rockova2018]
-  * BhGLM [@Yi2019]
-
-
-
-### Decomposition of Objective Function
-We aim to maximize the log posterior density of $\Theta$ by averaging over all possible values of $\bm \gamma$
-$$ \log f(\Theta, \bs \gamma| \textbf{y}, \textbf{X}) = Q_1(\bs \beta, \phi) + Q_2 (\bs \gamma,\bs \theta),$$
-
-* L$_1$-penalized likelihood function of $\bs \beta, \phi$
-$$Q_1 \equiv Q_1(\bs \beta, \phi) = \log f(\textbf{y}|\bs \beta, \phi) + \sum\limits_{j=1}^p\left[\log f(\beta_j|\gamma_j)+\sum\limits_{k=1}^{K_j} \log f(\beta^{\tp}_{jk}|\gamma^{\tp}_{jk})\right]$$
-* Posterior density of $\theta$ given data points $\gamma$s
-$$Q_2 \equiv Q_2(\bs\gamma,\bs\theta) = \sum\limits_{j=1}^{p} \left[ (\gamma_j+\gamma_{j}^{\tp})\log \theta_j + (2-\gamma_j-\gamma_{j}^{\tp}) \log (1-\theta_j)\right] +  \sum\limits_{j=1}^{p}\log f(\theta_j).$$
-
-* $Q_1$ and $Q_2$ are independent conditioning on $\gamma$s
-
-
-### Summary of EM-Coordinate Descent Algorithm
-* E-step
-  * Formulate $E_{\bm \gamma|\Theta^{(t)}}\left[Q(\Theta, \bm \gamma)\right] = E(Q_1) + E(Q_2)$
-    * $E(Q_1)$ is a penalized likelihood function of $\beta, \phi$
-    * $E(Q_2)$ is a posterior density of $\theta$ given $E(\gamma)$
-    * $E(Q_1)$ and $E(Q_2)$ are conditionally independent
-  * Calculate $E(\gamma_{j})$, $E(\gamma^\tp_{j})$ and the penalties parameters by Bayes' theorem
-* M-step: 
-  * Use Coordinate Descent to fit the penalized model in $E(Q_1)$ to update $\beta, \phi$ 
-  * Closed form calculation via $E(Q_2)$ to update $\theta$
-
-### Tuning Parameter Selection
-* $s_0$ and $s_1$ are tuning parameters
-* Empirically, $s_1$ has extremely small effect on changing the estimates
-* Focus on tuning $s_0$
-* Consider a sequence of $L$ ordered values $\{s_0^l\}: 0 < s_0^1 < s_0^2 < \dots < s_0^L < s_1$
-* Cross-validation to choose optimal value for $s_0$
-
-## Simulation Study
-* Follow the data generating process introduced in @Bai2020. 
-* $n_{train} = 500$, $n_{test}=1000$
-* $p=4, 10, 50, 200$
-$$
-\mu = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
-$$
-
-* $f_j(x_j) = 0$ for $j = 5, \dots, p$.
-* 2 types of outcome: Gaussian ($\phi=1$), Binomial
-* Splines are constructed using 10 knots
-* 50 Iterations
-
-### Comparison & Metircs
-* Methods of comparison
-  * Proposed model BHAM
-  * Linear LASSO model as the benchmark
-  * mgcv [@Wood2004]
-  * COSSO [@Zhang2006GAM] and adaptive COSSO[@Storlie2011]
-  * Sparse Bayesian GAM [@Bai2021]
-  * spikeSlabGAM [@Scheipl2012]
-
-* Metrics
-  * Prediction: $R^2$ for continuous outcomes, out-of-sample AUC for binary outcomes
-  * Variable Selection: positive predictive value (precision), true positive rate (recall), and Matthews correlation coefficient (MCC)
-  
-### Prediction Performance
-
-* Linear LASSO Model performs bad and mgcv performs well
-* BHAM performs better than COSSO, adaptive COSSO and spikeSlabGAM
-* BHAM performs better than SB-GAM in low-dimensional case but slightly worse in the high-dimensional setting
-* BHAM is much faster than SB-GAM in fitting models
-
-### Variable Selection Performance
-* SB-GAM has the best variable selection performance
-* BHAM has conservative selection
-* BHAM and spikeSlabGAM have trade-offs for bi-level selection
-  * spikeSlabGAM tends to select either linear or nonlinear components of the funciton
-  * BHAM is more likely to select both parts
-
-
-
-  
-# Conclusion 
-
-- Propose a scalable Bayesian Hierarchical Additive Model (BHAM) for high-dimensional data analysis
-  - Organic balance between sparse penalty and smooth penalty
-  - Bi-level selection for linear and nonlinear effects
-
-- R package: \texttt{BHAM}
-  - Ancillary functions for high-dimensional formulation
-  - Model summary and variable selection
-  - Website via [_boyiguo1.github.io/BHAM_](https://boyiguo1.github.io/BHAM/)
-  
-  
-# Acknowledgement {.unlisted .unnumbered}
+### Scope
+Scope of this dissertation
+* BHAM
+* Survival Model
+* R package `BHAM`
 
 # References {.allowframebreaks}

@@ -83,6 +83,19 @@
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
 \newif\ifbibliography
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -135,8 +148,8 @@ University of Alabama at Birmingham}
 \begin{document}
 \frame{\titlepage}
 
-% \hypertarget{outline}{%
-% \section*{Outline}\label{outline}}
+\hypertarget{outline}{%
+\section*{Outline}\label{outline}}
 
 \begin{frame}{Outline}
 \begin{itemize}
@@ -161,7 +174,7 @@ University of Alabama at Birmingham}
   \item
     Two-part Spike-and-slab LASSO Prior for Spline Functions
   \item
-    Fast and Scalable Model Fitting Algorithms
+    EM-Coordinate Descent Algorithms
   \item
     Empirical Performance of Prediction \& Selection
   \end{itemize}
@@ -186,8 +199,7 @@ University of Alabama at Birmingham}
 \hypertarget{spline-model-development}{%
 \subsection{Spline Model Development}\label{spline-model-development}}
 
-\begin{frame}{Nonlinear Effect Modeling}
-\protect\hypertarget{nonlinear-effect-modeling}{}
+\begin{frame}{Spline Model Development}
 \begin{quote}
 ``It is extremely unlikely that the true (effect) function f(X)
 (\emph{on the outcome}) is actually linear in X.'' \hspace*{2cm}
@@ -222,97 +234,263 @@ University of Alabama at Birmingham}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Generalized Additive Model (GAM)}
-\protect\hypertarget{generalized-additive-model-gam}{}
-Firstly formulated by Hastie and Tibshirani (1987) \begin{align*}
-  y_i \simiid EF(\mu_i, \phi), \quad i = 1, \dots, n\\
-  \mu_i = g^{-1}(\beta_0 + \sum\limits^p_{j=1}B_j(x_j))
-\end{align*} where \(B_j(x_j)\) is a smoothing function, \(g(\cdot)\) is
-a link function, \(\phi\) is the dispersion parameter
+\begin{frame}{Spline Functions}
+\protect\hypertarget{spline-functions}{}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+A \emph{spline} function is a piece-wise polynomial function \[
+B(x) = \sum\limits_{k = 1}^K \beta_k b_k(x) \equiv  \bs X^T \bs \beta
+\] \(b_k(x)\) are the \emph{basis functions}, possibly truncated power
+basis and b-spline basis.
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\centering
+
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth,height=0.6\textheight]{spline_visual.jpg}
+\caption{A cubic spline function with 2 knots (courtesy of Hastie,
+Tibshirani, and Friedman (2009))}
+\end{figure}
+\end{column}
+\end{columns}
+
+We defer more information about spline functions to Wood (2017)
+
+We assume the knots of the functions are equidistance.
+\end{frame}
+
+\begin{frame}{Generalized Additive Models with Splines}
+\protect\hypertarget{generalized-additive-models-with-splines}{}
+\textbf{Generalized additive model} (Hastie and Tibshirani 1987) is
+expressed \begin{align*}
+  y_i &\simiid EF(\mu_i, \phi), \quad i = 1, \dots, n\\
+  g(\mu_i) &= \beta_0 + B(x_i) = \beta_0 + \bs X_i^T \bs \beta ,  \quad \mathbb{E}\left[B(X)\right] = 0 
+\end{align*} where \(B(x_i)\) is the spline function, \(g(\cdot)\) is a
+link function, \(\phi\) is the dispersion parameter
+
+\vspace*{0.5cm}
 
 \begin{itemize}
 \tightlist
 \item
-  Objective: to estimate smoothing functions \(B_j(x_j)\)
-\item
-  Applications in biomedical research:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Dose-response curve
-  \item
-    Time-varying effect
-  \end{itemize}
+  Model fitting follows the generalized linear models, e.g.~ordinary
+  least square for Gaussian outcome \[
+  \boldsymbol{\hat \beta} = \text{arg}\min \sum\limits^n_{i=1} \left[y_i - \beta_0 - \bs X_i^T \bs \beta \right]^2
+  \]
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Problem: Function Smoothness}
+\protect\hypertarget{problem-function-smoothness}{}
+The estimation of \(B(X)\) can be wiggly when the underlying function is
+smooth, particularly as the number of bases ,\(K\), increases.
+
+{[}TODO: add two plots, overfitting and not overfitting{]}
 \end{frame}
 
 \hypertarget{bayesian-regularization}{%
 \subsection{Bayesian Regularization}\label{bayesian-regularization}}
 
-\hypertarget{bayesian-variable-selection}{%
-\subsection{Bayesian Variable
-Selection}\label{bayesian-variable-selection}}
+\begin{frame}{Smoothing Spline Model}
+\protect\hypertarget{smoothing-spline-model}{}
+\begin{itemize}
+\item
+  Smoothing penalty
+  \(\lambda \int B^{''}(X)^2dx = \lambda \bs \beta^T \bs S \bs\beta\)
 
-\begin{frame}{High-dimensional GAM}
-\protect\hypertarget{high-dimensional-gam}{}
+  \begin{itemize}
+  \tightlist
+  \item
+    The smoothing penalty matrix \(\bs S\) is known given \(\bs X\)
+  \item
+    \(\bs S\) is symmetric and positive semi-definite
+  \end{itemize}
+\item
+  Penalized Least Square for Gaussian Outcome \[
+  \boldsymbol{\hat \beta} = \text{arg}\min \sum\limits^n_{i=1} \sum\limits^n_{i=1} \left[y_i - \beta_0 - \bs X_i^T \bs \beta \right]^2 + \lambda \bs \beta^T \bs S \bs\beta
+  \]
+\item
+  The smoothing parameter \(\lambda\) is a tuning parameter, selected
+  via cross-validation
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Problem: Multiple Predictor Model}
+\protect\hypertarget{problem-multiple-predictor-model}{}
+When a model contains multiple spline functions for variables
+\(X_1, \dots, X_p\), the penalized least square estimator is \[
+\boldsymbol{\hat \beta} = \text{arg}\min \sum\limits^n_{i=1} \sum\limits^n_{i=1} \left[y_i - \beta_0 - \sum\limits \bs X_{ij}^T \bs \beta_j \right]^2 + \lambda_j \bs \beta_j^T \bs S_j \bs\beta_j
+\]
+
+\emph{How to decide \(\lambda_i\)?}
+
 \begin{itemize}
 \tightlist
 \item
-  Grouped penalty models
+  Global smoothing, i.e.~\(\lambda_1 = \cdots =\lambda_p\) assumes all
+  functions shares the same shape
+\item
+  Adaptive smoothing, i.e.~examining \(\lambda_i\) combination, are
+  computationally intensive
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Bayesian Regularization}
+\protect\hypertarget{bayesian-regularization-1}{}
+\begin{itemize}
+\tightlist
+\item
+  Bayesian Regularization is the Bayesian analogy of penalized models by
+  using regularizing priors
 
   \begin{itemize}
   \tightlist
   \item
-    Grouped lasso penalty (Ravikumar et al. 2009; Huang, Horowitz, and
-    Wei 2010), grouped SCAD penalty (Wang, Chen, and Li 2007; Xue 2009)
-  \item
-    Sparse penalty induces \textbf{excess shrinkage}, causing inaccurate
-    interpolation of nonlinear effect
+    Bayesian ridge via normal prior \[
+     \beta \sim N(0, \tau^2) \rightarrow  \lambda = \sigma^2/\tau^2
+    \]
   \end{itemize}
 \item
-  Bayesian Hierarchical Models
+  Adaptive shrinkage with hierarchical priors \[
+   \tau^2_j \simiid IG(a, b)
+  \]
 
   \begin{itemize}
   \tightlist
   \item
-    Grouped spike-and-slab priors (Scheipl, Fahrmeir, and Kneib 2012;
-    Yang and Narisetty 2020), grouped spike-and-slab lasso prior(Bai et
-    al. 2020; Bai 2021)
-  \item
-    Mostly Markov chain Monte Carlo methods for model fitting
-  \item
-    Computational inefficiency causes \textbf{scaling problems} in
-    high-dimensional data analysis
+    Adaptive Smoothing
+
+    \begin{itemize}
+    \tightlist
+    \item
+      Random walk prior on b-spline bases with IG hyperprior
+    \item
+      Normal prior on truncated power bases with a log-normal spline
+      model for variance
+    \end{itemize}
   \end{itemize}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Other challenges}
-\protect\hypertarget{other-challenges}{}
+\hypertarget{bayesian-variable-selection}{%
+\subsection{Bayesian Variable
+Selection}\label{bayesian-variable-selection}}
+
+\begin{frame}{Problem: Functional Selection}
+\protect\hypertarget{problem-functional-selection}{}
+In the context of variable selection and high-dimensional statistics, we
+always assume some variables are not effective or predictive to the
+outcome.
+
+How to statistically detect
+
 \begin{itemize}
 \tightlist
 \item
-  Bi-level selection
+  if a variable is predictive to the outcome, \(B_j(X_j) = 0\)
+\item
+  if a variable has a nonlinear relationship with the outcome,
+  \(B_j(X_j) = \beta_j X_j\)
+\end{itemize}
+
+\emph{Bi-level selection} is the procedure that simultaneously addresses
+the two questions above
+\end{frame}
+
+\begin{frame}{Spike-and-Slab Priors}
+\protect\hypertarget{spike-and-slab-priors}{}
+Spike-and-slab priors are a family of mixture distributions that deploys
+a characterizing structure
+\[\beta|\gamma \sim (1-\gamma)f_{spike}(\beta) + \gamma f_{slab}(\beta)\]
+
+\begin{itemize}
+\item
+  Latent indicator \(\gamma\) follows a Bernoulli distribution with
+  probability \(\theta\)
+\item
+  Spike density \(f_{spike}(x)\) concentrates around 0 for small effects
+\item
+  Slab density \(f_{slab}(x)\) is a flat density for large effects
+\item
+  Natural procedure to select variables via posterior distribution of
+  \(\gamma\)
+\item
+  Markov chain Monte Carlo is not compelling for high-dimensional data
+  analysis
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Spike-and-Slab LASSO Priors}
+\protect\hypertarget{spike-and-slab-lasso-priors}{}
+\begin{itemize}
+\tightlist
+\item
+  Double exponential distributions as the spike and slab distributions
+  \[\beta|\gamma \sim (1-\gamma)DE(0, s_0) + \gamma DE(0, s_1), 0 < s_0 < s_1\]
 
   \begin{itemize}
   \tightlist
   \item
-    To detect if a smoothing function is linear and nonlinear
+    Seamless variable selection as coefficients shrinkage to 0
   \item
-    All-in-all-out selection reduces the ability of result
-    interpretation
+    Computation advantages via Expectation-Maximization (EM) algorithms
   \end{itemize}
 \item
-  Uncertainty inferences
+  Group spike-and-slab LASSO
 
   \begin{itemize}
   \tightlist
   \item
-    Penalized models doesn't provide uncertainty measures
+    Structure underlying predictors, e.g.~gene pathways, bases of a
+    spline function
   \item
-    Challenging to estimate the effective degree of freedom for each
-    smoothing functions
+    Structured prior on \(\gamma\) \[
+    \gamma_k | \theta_j ~ Binomial(1, \theta_j), k \in j
+    \]
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Problem: High-dimensional Spline Model}
+\protect\hypertarget{problem-high-dimensional-spline-model}{}
+How to jointly model signal sparsity and function smoothness, while
+capable of bi-level selection?
+
+\begin{itemize}
+\tightlist
+\item
+  Excess shrinkage due to ignoring smooth penalty completely
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Group lasso penalty (Ravikumar et al. 2009; Huang, Horowitz, and Wei
+    2010), group SCAD penalty (Wang, Chen, and Li 2007; Xue 2009)
+  \item
+    Global penalty VS adaptive penalty
+  \end{itemize}
+\item
+  All-in-all-out selection
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Can not detect if a function is linear, e.g.~spike-and-slab grouped
+    LASSO prior (Bai et al. 2020; Bai 2021)
+  \item
+    Failed to select function as whole, e.g.~group spike-and-slab LASSO
+    prior
+  \end{itemize}
+\item
+  Computational prohibitive algorithms
+
+  \begin{itemize}
+  \tightlist
+  \item
+    MCMC algorithms doesn't scale well for high-dimensional models
+    (Scheipl, Fahrmeir, and Kneib 2012)
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -320,24 +498,8 @@ Selection}\label{bayesian-variable-selection}}
 \hypertarget{dissertation}{%
 \section{Dissertation}\label{dissertation}}
 
-\begin{frame}[fragile]{Dissertation}
-Scope of this dissertation
-
-\begin{itemize}
-\tightlist
-\item
-  BHAM
-\item
-  Survival Model
-\item
-  R package \texttt{BHAM}
-\end{itemize}
-\end{frame}
-
-\hypertarget{objectives}{%
-\subsection{Objectives}\label{objectives}}
-
 \begin{frame}{Objectives}
+\protect\hypertarget{objectives}{}
 \begin{itemize}
 \tightlist
 \item
@@ -358,380 +520,15 @@ Scope of this dissertation
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Model}
-\protect\hypertarget{model}{}
-Given the data \(\{\bm X_i, y_i\}_{i=1}^n\) where
-\(\bm X_i \in \mathbb{R}^p\), \(y_i \in \mathbb{R}\) and \(p >> n\), we
-have the generalized additive model \begin{align*}
-y_i &\overset{\text{i.i.d.}}{\sim} EF(\mu_i, \phi),\\
-g(\mu_i) &= g^{-1}(\beta_0 + \sum\limits^p_{j=1}B_j(x_j)) , \quad i = 1, \dots, n.
-\end{align*} The smoothing function can be written in a matrix form
-\(B_j(x_j) = \bs \beta_j^T \bs X_j\), where \(\bs \beta_j\) are the
-coefficients of the smoothing function and \(\bs X_j\) is the basis
-matrix of dimension \(K_j\).
+\begin{frame}[fragile]{Scope}
+\protect\hypertarget{scope}{}
+Scope of this dissertation * BHAM * Survival Model * R package
+\texttt{BHAM}
 \end{frame}
 
-\begin{frame}{Smoothing Function Reparameterization}
-\protect\hypertarget{smoothing-function-reparameterization}{}
-\begin{itemize}
-\item
-  Smoothing penalty from Smoothing spline regression (Simon N. Wood
-  2017) \[
-  \lambda_j \int B^{\prime\prime}_j(x)dx = \lambda_j \bs \beta_j^T \bs S_j \bs \beta_j,
-  \] where \(S_j\) is a known smoothing penalty matrix.
-\item
-  Isolate the linear and nonlinear components via eigendecomposing
-  \(S_j\) \[\bm X \bm \beta = X^{0} \beta + \bs X^\tp\beta^\tp\]
-\item
-  Benefits
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Motivate bi-level selection
-  \item
-    Implicit modeling of function smoothness
-  \item
-    Reduce computation load with conditionally independent prior of
-    basis coefficients
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Two-part Spike-and-slab LASSO (SSL) Prior}
-\protect\hypertarget{two-part-spike-and-slab-lasso-ssl-prior}{}
-\begin{itemize}
-\tightlist
-\item
-  SSL prior for the linear coefficient and group SSL priors for
-  nonlinear coefficients \begin{align*}
-  \beta_{j} |\gamma_{j},s_0,s_1 &\sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1) \\
-  \beta^\tp_{jk} | \gamma^\tp_{j},s_0,s_1 &\simiid DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1), k = 1, \dots, K_j
-  \end{align*}
-\item
-  Effect hierarchy enforced latent inclusion indicators \(\gamma_j\) and
-  \(\gamma^\tp_{j}\) for bi-level selection \[
-  \gamma_{j} | \theta_j \sim Bin(\gamma_{j}|1, \theta_j),\quad
-  \gamma_{j}^\tp | \bg{\gamma_{j}}, \theta_j \sim Bin(1, \bg{\gamma_{j}}\theta_j),
-  \]
-\item
-  Local adaptivity of signal sparsity and function smoothness \[
-  \theta_j \sim \text{Beta}(a,b)
-  \]
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Visual Representation}
-\protect\hypertarget{visual-representation}{}
-\begin{figure}
-\centering
-\resizebox{12cm}{5.5cm}{
-\begin{tikzpicture} [
-staticCompo/.style = {rectangle, minimum width=1cm, minimum height=1cm,text centered, draw=black, fill=blue!30},
-outCome/.style={ellipse, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=blue!30},
-mymatrix/.style={matrix of nodes, nodes=outCome, row sep=1em},
-PriorBoarder/.style={rectangle, minimum width=5cm, minimum height=10cm, text centered, fill=lightgray!30},
-background/.style={rectangle, fill=gray!10,inner sep=0.2cm, rounded corners=5mm}
-]
-
-\matrix (linearPrior) [matrix of nodes, column sep = 0mm, row sep = 0.7cm] {
-  \node (linearGamma) [outCome] { $\gamma_j \sim Bin(1, \theta_j) $ };\\
-  \node (linearBeta) [outCome] { $\beta_j \sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1)$};\\
-};
-\matrix (penPrior) [right = 2cm of linearPrior, matrix of nodes, column sep = 0mm, row sep = 0.7cm] {
-  \node (penGamma) [outCome] { $\gamma_{j}^\tp \sim Bin(1, \bg{\gamma_{j}}\theta_j)$ };\\
-  \node (penBeta) [outCome] { $\beta_{jk}^\tp \sim  DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1)$};\\
-};
-
-
-\node (s) [staticCompo]  at ($(linearBeta)!0.5!(penBeta)$)  {($s_0, s_1$)};
-\node (Beta) [staticCompo, below = 1cm of s] {$\bs \beta = (\beta_1, \bs \beta^\tp_1, \dots,\beta_j, \bs \beta^\tp_j , \dots,\beta_p, \bs \beta^\tp_p) $};
-\node (Theta)[outCome, above = 2cm of s] {$\theta_{j} \sim Beta(a, b)$};
-\node (ab)[staticCompo, above = 0.5cm of Theta] {$(a, b)$};
-\node (Y) [outCome, below = 1cm of Beta] {$y_i \sim Expo. Fam. (g^{-1}(\bs \beta^T \bs X_i), \phi)$};
-
-\draw[->] (Theta) -- (linearGamma);
-\draw[->] (Theta) -- (penGamma);
-\draw[->] (linearGamma) -- (linearBeta) ;
-\draw[->] (penGamma) -- (penBeta);
-\draw[->, draw = red] (linearGamma) -- (penGamma);
-\draw[->] (ab) -- (Theta);
-\draw[->] (s) -- (linearBeta) ;
-\draw[->] (s) -- (penBeta);
-\draw[->] (linearBeta) -- (Beta);
-\draw[->] (penBeta) -- (Beta);
-\draw[->] (Beta) --  (Y);
-
-
-\begin{pgfonlayer}{background}
-  \node [background,
-   fit=(linearGamma) (linearBeta),
-   label=above:Linear Space:] {};
-  \node [background,
-    fit=(penGamma) (penBeta),
-    label=above:Nonlinear Space:] {};
-\end{pgfonlayer}
-
-\end{tikzpicture}
-}
-\end{figure}
-\end{frame}
-
-\hypertarget{em-cooridante-descent-algrithm-for-scalable-model-fitting}{%
-\subsection{EM-Cooridante Descent Algrithm for Scalable Model
-Fitting}\label{em-cooridante-descent-algrithm-for-scalable-model-fitting}}
-
-\begin{frame}{EM-Cooridante Descent Algrithm for Scalable Model Fitting}
-We are interested in estimating
-\(\Theta = \{\bm \beta, \bm \theta, \phi\}\) using optimization based
-algorithm for scalability purpose
-
-\begin{itemize}
-\tightlist
-\item
-  Basic Ideas
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Treat \(\gamma\)s as the ``missing data'' in the EM procedure
-  \item
-    Quantify the expectation of log posterior density function of
-    \(\Theta\) with respect to \(\gamma\) conditioning on
-    \(\Theta^{(t-1)}\)
-  \item
-    Maximize two parts of the objective function independently
-  \end{itemize}
-\item
-  Previous applications in high-dimensional data analysis
-
-  \begin{itemize}
-  \tightlist
-  \item
-    EMVS (Ročková and George 2014), Spike-and-slab lasso (Ročková and
-    George 2018)
-  \item
-    BhGLM (Yi et al. 2019)
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Decomposition of Objective Function}
-\protect\hypertarget{decomposition-of-objective-function}{}
-We aim to maximize the log posterior density of \(\Theta\) by averaging
-over all possible values of \(\bm \gamma\)
-\[ \log f(\Theta, \bs \gamma| \textbf{y}, \textbf{X}) = Q_1(\bs \beta, \phi) + Q_2 (\bs \gamma,\bs \theta),\]
-
-\begin{itemize}
-\item
-  L\(_1\)-penalized likelihood function of \(\bs \beta, \phi\)
-  \[Q_1 \equiv Q_1(\bs \beta, \phi) = \log f(\textbf{y}|\bs \beta, \phi) + \sum\limits_{j=1}^p\left[\log f(\beta_j|\gamma_j)+\sum\limits_{k=1}^{K_j} \log f(\beta^{\tp}_{jk}|\gamma^{\tp}_{jk})\right]\]
-\item
-  Posterior density of \(\theta\) given data points \(\gamma\)s
-  \[Q_2 \equiv Q_2(\bs\gamma,\bs\theta) = \sum\limits_{j=1}^{p} \left[ (\gamma_j+\gamma_{j}^{\tp})\log \theta_j + (2-\gamma_j-\gamma_{j}^{\tp}) \log (1-\theta_j)\right] +  \sum\limits_{j=1}^{p}\log f(\theta_j).\]
-\item
-  \(Q_1\) and \(Q_2\) are independent conditioning on \(\gamma\)s
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Summary of EM-Coordinate Descent Algorithm}
-\protect\hypertarget{summary-of-em-coordinate-descent-algorithm}{}
-\begin{itemize}
-\tightlist
-\item
-  E-step
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Formulate
-    \(E_{\bm \gamma|\Theta^{(t)}}\left[Q(\Theta, \bm \gamma)\right] = E(Q_1) + E(Q_2)\)
-
-    \begin{itemize}
-    \tightlist
-    \item
-      \(E(Q_1)\) is a penalized likelihood function of \(\beta, \phi\)
-    \item
-      \(E(Q_2)\) is a posterior density of \(\theta\) given
-      \(E(\gamma)\)
-    \item
-      \(E(Q_1)\) and \(E(Q_2)\) are conditionally independent
-    \end{itemize}
-  \item
-    Calculate \(E(\gamma_{j})\), \(E(\gamma^\tp_{j})\) and the penalties
-    parameters by Bayes' theorem
-  \end{itemize}
-\item
-  M-step:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Use Coordinate Descent to fit the penalized model in \(E(Q_1)\) to
-    update \(\beta, \phi\)
-  \item
-    Closed form calculation via \(E(Q_2)\) to update \(\theta\)
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Tuning Parameter Selection}
-\protect\hypertarget{tuning-parameter-selection}{}
-\begin{itemize}
-\tightlist
-\item
-  \(s_0\) and \(s_1\) are tuning parameters
-\item
-  Empirically, \(s_1\) has extremely small effect on changing the
-  estimates
-\item
-  Focus on tuning \(s_0\)
-\item
-  Consider a sequence of \(L\) ordered values
-  \(\{s_0^l\}: 0 < s_0^1 < s_0^2 < \dots < s_0^L < s_1\)
-\item
-  Cross-validation to choose optimal value for \(s_0\)
-\end{itemize}
-\end{frame}
-
-\hypertarget{simulation-study}{%
-\subsection{Simulation Study}\label{simulation-study}}
-
-\begin{frame}{Simulation Study}
-\begin{itemize}
-\item
-  Follow the data generating process introduced in Bai et al. (2020).
-\item
-  \(n_{train} = 500\), \(n_{test}=1000\)
-\item
-  \(p=4, 10, 50, 200\) \[
-  \mu = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
-  \]
-\item
-  \(f_j(x_j) = 0\) for \(j = 5, \dots, p\).
-\item
-  2 types of outcome: Gaussian (\(\phi=1\)), Binomial
-\item
-  Splines are constructed using 10 knots
-\item
-  50 Iterations
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Comparison \& Metircs}
-\protect\hypertarget{comparison-metircs}{}
-\begin{itemize}
-\tightlist
-\item
-  Methods of comparison
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Proposed model BHAM
-  \item
-    Linear LASSO model as the benchmark
-  \item
-    mgcv (S. N. Wood 2004)
-  \item
-    COSSO (Zhang and Lin 2006) and adaptive COSSO(Storlie et al. 2011)
-  \item
-    Sparse Bayesian GAM (Bai 2021)
-  \item
-    spikeSlabGAM (Scheipl, Fahrmeir, and Kneib 2012)
-  \end{itemize}
-\item
-  Metrics
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Prediction: \(R^2\) for continuous outcomes, out-of-sample AUC for
-    binary outcomes
-  \item
-    Variable Selection: positive predictive value (precision), true
-    positive rate (recall), and Matthews correlation coefficient (MCC)
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Prediction Performance}
-\protect\hypertarget{prediction-performance}{}
-\begin{itemize}
-\tightlist
-\item
-  Linear LASSO Model performs bad and mgcv performs well
-\item
-  BHAM performs better than COSSO, adaptive COSSO and spikeSlabGAM
-\item
-  BHAM performs better than SB-GAM in low-dimensional case but slightly
-  worse in the high-dimensional setting
-\item
-  BHAM is much faster than SB-GAM in fitting models
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Variable Selection Performance}
-\protect\hypertarget{variable-selection-performance}{}
-\begin{itemize}
-\tightlist
-\item
-  SB-GAM has the best variable selection performance
-\item
-  BHAM has conservative selection
-\item
-  BHAM and spikeSlabGAM have trade-offs for bi-level selection
-
-  \begin{itemize}
-  \tightlist
-  \item
-    spikeSlabGAM tends to select either linear or nonlinear components
-    of the funciton
-  \item
-    BHAM is more likely to select both parts
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-\hypertarget{conclusion}{%
-\section{Conclusion}\label{conclusion}}
-
-\begin{frame}{Conclusion}
-\begin{itemize}
-\tightlist
-\item
-  Propose a scalable Bayesian Hierarchical Additive Model (BHAM) for
-  high-dimensional data analysis
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Organic balance between sparse penalty and smooth penalty
-  \item
-    Bi-level selection for linear and nonlinear effects
-  \end{itemize}
-\item
-  R package: \texttt{BHAM}
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Ancillary functions for high-dimensional formulation
-  \item
-    Model summary and variable selection
-  \item
-    Website via
-    \href{https://boyiguo1.github.io/BHAM/}{\emph{boyiguo1.github.io/BHAM}}
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-% \hypertarget{acknowledgement}{%
-% \section*{Acknowledgement}\label{acknowledgement}}
-
-% \hypertarget{references}{%
-% \section*{References}\label{references}}
-% \addcontentsline{toc}{section}{References}
+\hypertarget{references}{%
+\section*{References}\label{references}}
+\addcontentsline{toc}{section}{References}
 
 \begin{frame}[allowframebreaks]{References}
 \hypertarget{refs}{}
@@ -769,17 +566,6 @@ Ravikumar, Pradeep, John Lafferty, Han Liu, and Larry Wasserman. 2009.
 Society: Series B (Statistical Methodology)} 71 (5): 1009--30.
 \url{https://doi.org/10.1111/j.1467-9868.2009.00718.x}.
 
-\leavevmode\vadjust pre{\hypertarget{ref-Rockova2014a}{}}%
-Ročková, Veronika, and Edward I. George. 2014. {``{EMVS: The EM approach
-to Bayesian variable selection}.''} \emph{Journal of the American
-Statistical Association} 109 (506): 828--46.
-\url{https://doi.org/10.1080/01621459.2013.869223}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-Rockova2018}{}}%
----------. 2018. {``{The Spike-and-Slab LASSO}.''} \emph{Journal of the
-American Statistical Association} 113 (521): 431--44.
-\url{https://doi.org/10.1080/01621459.2016.1260469}.
-
 \leavevmode\vadjust pre{\hypertarget{ref-Scheipl2012}{}}%
 Scheipl, Fabian, Ludwig Fahrmeir, and Thomas Kneib. 2012.
 {``{Spike-and-slab priors for function selection in structured additive
@@ -787,20 +573,10 @@ regression models}.''} \emph{Journal of the American Statistical
 Association} 107 (500): 1518--32.
 \url{https://doi.org/10.1080/01621459.2012.737742}.
 
-\leavevmode\vadjust pre{\hypertarget{ref-Storlie2011}{}}%
-Storlie, Curtis B, Howard D Bondell, Brian J Reich, and Hao Helen Zhang.
-2011. {``Surface Estimation, Variable Selection, and the Nonparametric
-Oracle Property.''} \emph{Statistica Sinica} 21 (2): 679.
-
 \leavevmode\vadjust pre{\hypertarget{ref-Wang2007}{}}%
 Wang, Lifeng, Guang Chen, and Hongzhe Li. 2007. {``Group SCAD Regression
 Analysis for Microarray Time Course Gene Expression Data.''}
 \emph{Bioinformatics} 23 (12): 1486--94.
-
-\leavevmode\vadjust pre{\hypertarget{ref-Wood2004}{}}%
-Wood, S. N. 2004. {``Stable and Efficient Multiple Smoothing Parameter
-Estimation for Generalized Additive Models.''} \emph{Journal of the
-American Statistical Association} 99 (467): 673--86.
 
 \leavevmode\vadjust pre{\hypertarget{ref-Wood2017}{}}%
 Wood, Simon N. 2017. \emph{{Generalized additive models: An introduction
@@ -809,21 +585,6 @@ with R, second edition}}. \url{https://doi.org/10.1201/9781315370279}.
 \leavevmode\vadjust pre{\hypertarget{ref-Xue2009}{}}%
 Xue, Lan. 2009. {``Consistent Variable Selection in Additive Models.''}
 \emph{Statistica Sinica}, 1281--96.
-
-\leavevmode\vadjust pre{\hypertarget{ref-Yang2020}{}}%
-Yang, Xinming, and Naveen N Narisetty. 2020. {``Consistent Group
-Selection with Bayesian High Dimensional Modeling.''} \emph{Bayesian
-Analysis} 15 (3): 909--35.
-
-\leavevmode\vadjust pre{\hypertarget{ref-Yi2019}{}}%
-Yi, Nengjun, Zaixiang Tang, Xinyan Zhang, and Boyi Guo. 2019. {``BhGLM:
-Bayesian Hierarchical GLMs and Survival Models, with Applications to
-Genomics and Epidemiology.''} \emph{Bioinformatics} 35 (8): 1419--21.
-
-\leavevmode\vadjust pre{\hypertarget{ref-Zhang2006GAM}{}}%
-Zhang, Hao Helen, and Yi Lin. 2006. {``Component Selection and Smoothing
-for Nonparametric Regression in Exponential Families.''}
-\emph{Statistica Sinica}, 1021--41.
 
 \end{CSLReferences}
 \end{frame}
