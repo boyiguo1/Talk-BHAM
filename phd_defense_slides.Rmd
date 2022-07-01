@@ -419,17 +419,41 @@ $$
 
 # Future Research
 
-### Varying Coefficient Model
+## Modeling Interactions
+### Varying coefficient models 
+  * Assume the coefficient of a variable $X_j$ is a function of a covariate $Z_j$
+    * linear model: $\beta(Z_j) = \beta$
+    * VC model: $\beta(Z_j) = B(Z_j)$
+  * Replace each smooth function $B(z_{ij})$ with $B(z_{ij})x_{ij}\equiv \bs (x_{ij}\bs Z_{ij}^T)\bs \beta_j$
+  * Model fitting with EM-Coordinate Descent
+  
+Question: Can $Z_j$ be continuous? Can we have a more flexible model? 
 
 ### Smooth Surface Fitting
+* Tensor product of spline functions
+  $$
+    B_j(x_{ij}) + B_s(x_{is}) + B_{js}(x_{ij}, x_{is}),
+  $$
+where 
+
+Question: Can we have a generalized model that accounts fixed effects, nonlinear curves, smooth surfaces, and random effects?
 
 ### Structural Additive Model
 
 # Conclusion 
 
+- a
+- b
+- c
 
+## Acknowledgement
+-a
+-b
+-c
 
-# Acknowledgement
-
+## Advocacy
+-a
+-b
+-c
 
 # References {.allowframebreaks}

@@ -898,22 +898,97 @@ Model}\label{additive-cox-proportional-hazards-model}}
 
 \begin{frame}{R Package \texttt{BHAM}}
 \protect\hypertarget{r-package-bham}{}
+\begin{itemize}
+\tightlist
+\item
+  R package: \texttt{BHAM}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Ancillary functions for high-dimensional formulation
+  \item
+    Model summary and variable selection
+  \item
+    Website via
+    \href{https://boyiguo1.github.io/BHAM/}{\emph{boyiguo1.github.io/BHAM}}
+  \end{itemize}
+\end{itemize}
 \end{frame}
 
 \hypertarget{future-research}{%
 \section{Future Research}\label{future-research}}
 
-\begin{frame}{Varying Coefficient Model}
-\protect\hypertarget{varying-coefficient-model}{}
+\hypertarget{modeling-interactions}{%
+\subsection{Modeling Interactions}\label{modeling-interactions}}
+
+\begin{frame}{Varying coefficient models}
+\protect\hypertarget{varying-coefficient-models}{}
+\begin{itemize}
+\tightlist
+\item
+  Assume the coefficient of a variable \(X_j\) is a function of a
+  covariate \(Z_j\)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    linear model: \(\beta(Z_j) = \beta\)
+  \item
+    VC model: \(\beta(Z_j) = B(Z_j)\)
+  \end{itemize}
+\item
+  Replace each smooth function \(B(z_{ij})\) with
+  \(B(z_{ij})x_{ij}\equiv \bs (x_{ij}\bs Z_{ij}^T)\bs \beta_j\)
+\item
+  Model fitting with EM-Coordinate Descent
+\end{itemize}
+
+Question: Can \(Z_j\) be continuous? Can we have a more flexible model?
 \end{frame}
 
 \begin{frame}{Smooth Surface Fitting}
 \protect\hypertarget{smooth-surface-fitting}{}
+\begin{itemize}
+\tightlist
+\item
+  Tensor product of spline functions \[
+    B_j(x_{ij}) + B_s(x_{is}) + B_{js}(x_{ij}, x_{is}),
+  \] where
+\end{itemize}
+
+Question: Can we have a generalized model that accounts fixed effects,
+nonlinear curves, smooth surfaces, and random effects?
 \end{frame}
 
 \begin{frame}{Structural Additive Model}
 \protect\hypertarget{structural-additive-model}{}
 \end{frame}
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+\begin{frame}{Conclusion}
+\begin{itemize}
+\tightlist
+\item
+  a
+\item
+  b
+\item
+  c
+\end{itemize}
+\end{frame}
+
+\hypertarget{acknowledgement}{%
+\subsection{Acknowledgement}\label{acknowledgement}}
+
+\begin{frame}{Acknowledgement}
+-a -b -c
+\end{frame}
+
+\hypertarget{advocacy}{%
+\subsection{Advocacy}\label{advocacy}}
 
 \hypertarget{references}{%
 \section*{References}\label{references}}
