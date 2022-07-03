@@ -26,6 +26,13 @@ knitr::opts_chunk$set(echo = FALSE)
 # source("here::here(packages.R)")
 ```
 
+### Dissertation Committee
+* Chair: Nengjun Yi, Ph.D.
+* Member (in alphabetical order):
+  * AKM Fazlur Rahman, Ph.D.
+  * Byron C. Jaeger, Ph.D.
+  * D. Leann Long, Ph.D.
+  * Michael E. Seifert, M.D.
 
 
 # Outline {.unlisted .unnumbered}
@@ -52,13 +59,10 @@ knitr::opts_chunk$set(echo = FALSE)
 
 > --- @hastie2009elements PP. 139
 
-* Traditional modeling approaches
-  * Categorization of continuous variable, polynomial regression
-  * Simple but may be statistically flawed
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+How to model nonlinear effects?
+\end{tcolorbox}
 
-* Machine learning methods
-  * Black-box algorithms: Random forests, neural network
-  * Predict accurate but too complicated for interpretation
 
 ### Spline Functions
 
@@ -104,6 +108,10 @@ $$
 The estimation of $B(X)$ can be wiggly when the underlying function is smooth, particularly as the number of bases ,$K$, increases. 
 
 [TODO: add two plots, overfitting and not overfitting]
+
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+How to balance function smoothness and complexity?
+\end{tcolorbox}
 
 ## Bayesian Regularization
 
@@ -226,10 +234,7 @@ y_i &\overset{\text{i.i.d.}}{\sim} EF(\mu_i, \phi),\\
 g(\mu_i) &= \beta_0 + \sum\limits^p_{j=1}B_j(x_{ij}) , \quad i = 1, \dots, n.
 \end{align*}
 
-* Cox proportional hazard model with event time $t_i$
-$$
-  h(t_i) = h_0(t_i)\exp(\sum\limits^p_{j=1}B_j(x_{ij})) , \quad i = 1, \dots, n.
-$$
+
 
 ### Smoothing Function Reparameterization
 * Smoothing penalty from Smoothing spline regression [@Wood2017]
@@ -407,15 +412,113 @@ $$
 ## Additive Cox Proportional Hazards Model
 
 ### Model & Objective Functions
+* Cox proportional hazard model with event time $t_i$
+$$
+  h(t_i) = h_0(t_i)\exp(\sum\limits^p_{j=1}B_j(x_{ij})) , \quad i = 1, \dots, n.
+$$
+  * No intercept term because of the baseline hazard function
+* Model fitting
+  * Replace likelihood function with partial likelihood function
+$$
+\hat h_0(t_i|\beta) = d_i/\sum\limits_{i^\prime \in R(t_i)} exp(X_{i^\prime}\beta).
+$$
 
-### Emipirical Performance
+### Two-part Spike-and-slab LASSO (SSL) Prior
 
-### R Package `BHAM`
-- R package: \texttt{BHAM}
-  - Ancillary functions for high-dimensional formulation
+* SSL prior for the linear coefficient and group SSL priors for nonlinear coefficients
+\begin{align*}
+\beta_{j} |\gamma_{j},s_0,s_1 &\sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1) \\
+\beta^\tp_{jk} | \gamma^\tp_{j},s_0,s_1 &\simiid DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1), k = 1, \dots, K_j
+\end{align*}
+* Effect hierarchy enforced latent inclusion indicators $\gamma_j$ and $\gamma^\tp_{j}$ for bi-level selection
+$$
+\gamma_{j} | \theta_j \sim Bin(\gamma_{j}|1, \theta_j),\quad
+\gamma_{j}^\tp | \bg{\gamma_{j}}, \theta_j \sim Bin(1, \bg{\gamma_{j}}\theta_j),
+$$
+* Local adaptivity of signal sparsity and function smoothness
+$$
+\theta_j \sim \text{Beta}(a,b)
+$$
+
+### Summary of EM-Coordinate Descent Algorithm
+* E-step
+  * Formulate $E_{\bm \gamma|\Theta^{(t)}}\left[Q(\Theta, \bm \gamma)\right] = E(Q_1) + E(Q_2)$
+    * $E(Q_1)$ is a penalized likelihood function of $\beta, \phi$
+    * $E(Q_2)$ is a posterior density of $\theta$ given $E(\gamma)$
+    * $E(Q_1)$ and $E(Q_2)$ are conditionally independent
+  * Calculate $E(\gamma_{j})$, $E(\gamma^\tp_{j})$ and the penalties parameters by Bayes' theorem
+* M-step: 
+  * Use Coordinate Descent to fit the penalized model in $E(Q_1)$ to update $\beta, \phi$ 
+  * Closed form calculation via $E(Q_2)$ to update $\theta$
+
+## Simulation Study
+* Follow the data generating process introduced in @Bai2020. 
+* $n_{train} = 500$, $n_{test}=1000$
+* $p=4, 10, 50, 200$
+$$
+\mu = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
+$$
+
+* $f_j(x_j) = 0$ for $j = 5, \dots, p$.
+* 2 types of outcome: Gaussian ($\phi=1$), Binomial
+* Splines are constructed using 10 knots
+* 50 Iterations
+
+### Comparison & Metircs
+* Methods of comparison
+  * Proposed model BHAM
+  * Linear LASSO model as the benchmark
+  * mgcv [@Wood2004]
+  * COSSO [@Zhang2006GAM] and adaptive COSSO[@Storlie2011]
+
+* Metrics
+  * Out-of-sample deviance & Concordance
+  * Variable Selection: positive predictive value (precision), true positive rate (recall), and Matthews correlation coefficient (MCC)
+  
+### Prediction Performance
+
+* Linear LASSO Model performs bad and mgcv performs well
+* BHAM performs better than COSSO, adaptive COSSO and spikeSlabGAM
+
+### Emipirical Performance: Emory Cardiovascular Biobank
+
+![](ECB_bcam_KM.pdf){height=60%}
+
+## R Package `BHAM`
+  - Model formulation for high-dimensional data
+  - Model fitting and tuning
   - Model summary and variable selection
+  - Spline function visualization 
   - Website via [_boyiguo1.github.io/BHAM_](https://boyiguo1.github.io/BHAM/)
+  
+### Design Matrix of Spline Fucntions
+  - Flexible spline function formulation for high-dimensional data via `construct_smooth_data`
+  ```{r echo = T, eval= F}
+  spline_df <- dplyr::tribble(
+      ~Var, ~Func, ~Args,
+      "X1",  "s", "bs='cr', k=5",
+      "X2",  "s", NA,
+      "X3",  "s", "")
+  spline_df <- data.frame(
+      Var = setdiff(names(dat), "y"),
+      Func = "s",
+      Args ="bs='cr', k=7")
+  train_sm_dat <- BHAM::construct_smooth_data(spline_df, dat)
+  ```
 
+### Model Fitting Functions
+  - Model fitting via `bamlasso`
+    - Argument `family` for generalized and survival outcomes
+    - Argument `ss` for spike-and-slab LASSO scale parameters
+    - Argument `group` for group structures among predictors
+  - Model tuning via `tune`
+    - Argument `nfolds`, `ncv` for nested cross-validation
+    - Argument `s0` for tuning candidates
+
+### Post Fitting Functions
+  - Bi-level selection via `bamlasso_var_selection`
+  - Make prediction data for splines `make_predict_dat`
+  - Plot spline functions via `plot_smooth_term`
 
 # Future Research
 
@@ -435,25 +538,46 @@ Question: Can $Z_j$ be continuous? Can we have a more flexible model?
     B_j(x_{ij}) + B_s(x_{is}) + B_{js}(x_{ij}, x_{is}),
   $$
 where 
+$$
+B_{js}(x_{ij}, x_{is}) = \sum\limits^K_{P\rho=1} \sum\limits^K_{v=1} \beta_{jspv} b_{j\rho}(x_{ij})b_{sv}(x_{is})
+$$
+
 
 Question: Can we have a generalized model that accounts fixed effects, nonlinear curves, smooth surfaces, and random effects?
 
 ### Structural Additive Model
+High-dimensional structural additive model can be formulated as
+$$
+g(\mathbb{E}(y_i)) = \bs x_i^T \bs \theta + \bs u_i^T \bs \gamma + B(z_{i1}) + B(z_{i2}, z_{i3}) + B_{spat}(s_i)
+$$
+
+* Un-regularized predictors $\bs x_i$
+* Regularized predictors $\bs u_i$
+* Predictors with nonlinear effects $\bs z_i$
+* Spatial random effects with coordinates $s_i$
+
+Spike-and-slab LASSO prior motivates a seamless process of variable/functional selection and a scalable optimization-based model fitting algorithm
 
 # Conclusion 
 
-- a
-- b
-- c
+* Identify challenges in high-dimensional GAM with spline functions
+  * Balance between signal sparsity and function smoothness
+  * Bi-level selection to automatically detect linear and nonlinear effects
+* Statistical contribution
+  * Two-part spike-and-slab LASSO prior for smooth functions
+  * Scalable EM-Coordinate Descent algorithms for generalized and survival outcomes
+  * R package `BHAM`
+* Future Research
+  * Extension of spike-and-slab LASSO prior in structured additive model
 
-## Acknowledgement
--a
--b
--c
+<!-- ## Acknowledgement -->
+<!-- -a -->
+<!-- -b -->
+<!-- -c -->
 
-## Advocacy
--a
--b
--c
+<!-- ## Advocacy -->
+<!-- -a -->
+<!-- -b -->
+<!-- -c -->
 
 # References {.allowframebreaks}

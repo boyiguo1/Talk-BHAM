@@ -83,6 +83,46 @@
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
 \newif\ifbibliography
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -127,6 +167,8 @@
 \usepackage{tikz}
 \usepackage{pgfplots}
 \usepackage{bm}
+\usepackage{tcolorbox}
+
 \usetikzlibrary{shapes.geometric, arrows, positioning, calc, matrix, backgrounds, fit}
 \newcommand{\bs}[1]{\boldsymbol{#1}}
 \newcommand{\tp}{*}
@@ -147,6 +189,29 @@ University of Alabama at Birmingham}
 
 \begin{document}
 \frame{\titlepage}
+
+\begin{frame}{Dissertation Committee}
+\protect\hypertarget{dissertation-committee}{}
+\begin{itemize}
+\tightlist
+\item
+  Chair: Nengjun Yi, Ph.D.
+\item
+  Member (in alphabetical order):
+
+  \begin{itemize}
+  \tightlist
+  \item
+    AKM Fazlur Rahman, Ph.D.
+  \item
+    Byron C. Jaeger, Ph.D.
+  \item
+    D. Leann Long, Ph.D.
+  \item
+    Michael E. Seifert, M.D.
+  \end{itemize}
+\end{itemize}
+\end{frame}
 
 \hypertarget{outline}{%
 \section*{Outline}\label{outline}}
@@ -209,29 +274,9 @@ University of Alabama at Birmingham}
 --- Hastie, Tibshirani, and Friedman (2009) PP. 139
 \end{quote}
 
-\begin{itemize}
-\tightlist
-\item
-  Traditional modeling approaches
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Categorization of continuous variable, polynomial regression
-  \item
-    Simple but may be statistically flawed
-  \end{itemize}
-\item
-  Machine learning methods
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Black-box algorithms: Random forests, neural network
-  \item
-    Predict accurate but too complicated for interpretation
-  \end{itemize}
-\end{itemize}
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+How to model nonlinear effects?
+\end{tcolorbox}
 \end{frame}
 
 \begin{frame}{Spline Functions}
@@ -288,6 +333,10 @@ The estimation of \(B(X)\) can be wiggly when the underlying function is
 smooth, particularly as the number of bases ,\(K\), increases.
 
 {[}TODO: add two plots, overfitting and not overfitting{]}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+How to balance function smoothness and complexity?
+\end{tcolorbox}
 \end{frame}
 
 \hypertarget{bayesian-regularization}{%
@@ -552,14 +601,6 @@ Given the data \(\{y_i, x_{i1}, \dots ,x_{ip}\}_{i=1}^n\) where
 y_i &\overset{\text{i.i.d.}}{\sim} EF(\mu_i, \phi),\\
 g(\mu_i) &= \beta_0 + \sum\limits^p_{j=1}B_j(x_{ij}) , \quad i = 1, \dots, n.
 \end{align*}
-
-\begin{itemize}
-\tightlist
-\item
-  Cox proportional hazard model with event time \(t_i\) \[
-  h(t_i) = h_0(t_i)\exp(\sum\limits^p_{j=1}B_j(x_{ij})) , \quad i = 1, \dots, n.
-  \]
-\end{itemize}
 \end{frame}
 
 \begin{frame}{Smoothing Function Reparameterization}
@@ -890,29 +931,252 @@ Model}\label{additive-cox-proportional-hazards-model}}
 
 \begin{frame}{Model \& Objective Functions}
 \protect\hypertarget{model-objective-functions}{}
-\end{frame}
-
-\begin{frame}{Emipirical Performance}
-\protect\hypertarget{emipirical-performance}{}
-\end{frame}
-
-\begin{frame}{R Package \texttt{BHAM}}
-\protect\hypertarget{r-package-bham}{}
 \begin{itemize}
 \tightlist
 \item
-  R package: \texttt{BHAM}
+  Cox proportional hazard model with event time \(t_i\) \[
+  h(t_i) = h_0(t_i)\exp(\sum\limits^p_{j=1}B_j(x_{ij})) , \quad i = 1, \dots, n.
+  \]
 
   \begin{itemize}
   \tightlist
   \item
-    Ancillary functions for high-dimensional formulation
-  \item
-    Model summary and variable selection
-  \item
-    Website via
-    \href{https://boyiguo1.github.io/BHAM/}{\emph{boyiguo1.github.io/BHAM}}
+    No intercept term because of the baseline hazard function
   \end{itemize}
+\item
+  Model fitting
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Replace likelihood function with partial likelihood function \[
+    \hat h_0(t_i|\beta) = d_i/\sum\limits_{i^\prime \in R(t_i)} exp(X_{i^\prime}\beta).
+    \]
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Two-part Spike-and-slab LASSO (SSL) Prior}
+\protect\hypertarget{two-part-spike-and-slab-lasso-ssl-prior-1}{}
+\begin{itemize}
+\tightlist
+\item
+  SSL prior for the linear coefficient and group SSL priors for
+  nonlinear coefficients \begin{align*}
+  \beta_{j} |\gamma_{j},s_0,s_1 &\sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1) \\
+  \beta^\tp_{jk} | \gamma^\tp_{j},s_0,s_1 &\simiid DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1), k = 1, \dots, K_j
+  \end{align*}
+\item
+  Effect hierarchy enforced latent inclusion indicators \(\gamma_j\) and
+  \(\gamma^\tp_{j}\) for bi-level selection \[
+  \gamma_{j} | \theta_j \sim Bin(\gamma_{j}|1, \theta_j),\quad
+  \gamma_{j}^\tp | \bg{\gamma_{j}}, \theta_j \sim Bin(1, \bg{\gamma_{j}}\theta_j),
+  \]
+\item
+  Local adaptivity of signal sparsity and function smoothness \[
+  \theta_j \sim \text{Beta}(a,b)
+  \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Summary of EM-Coordinate Descent Algorithm}
+\protect\hypertarget{summary-of-em-coordinate-descent-algorithm-1}{}
+\begin{itemize}
+\tightlist
+\item
+  E-step
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Formulate
+    \(E_{\bm \gamma|\Theta^{(t)}}\left[Q(\Theta, \bm \gamma)\right] = E(Q_1) + E(Q_2)\)
+
+    \begin{itemize}
+    \tightlist
+    \item
+      \(E(Q_1)\) is a penalized likelihood function of \(\beta, \phi\)
+    \item
+      \(E(Q_2)\) is a posterior density of \(\theta\) given
+      \(E(\gamma)\)
+    \item
+      \(E(Q_1)\) and \(E(Q_2)\) are conditionally independent
+    \end{itemize}
+  \item
+    Calculate \(E(\gamma_{j})\), \(E(\gamma^\tp_{j})\) and the penalties
+    parameters by Bayes' theorem
+  \end{itemize}
+\item
+  M-step:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Use Coordinate Descent to fit the penalized model in \(E(Q_1)\) to
+    update \(\beta, \phi\)
+  \item
+    Closed form calculation via \(E(Q_2)\) to update \(\theta\)
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\hypertarget{simulation-study-1}{%
+\subsection{Simulation Study}\label{simulation-study-1}}
+
+\begin{frame}{Simulation Study}
+\begin{itemize}
+\item
+  Follow the data generating process introduced in Bai et al. (2020).
+\item
+  \(n_{train} = 500\), \(n_{test}=1000\)
+\item
+  \(p=4, 10, 50, 200\) \[
+  \mu = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
+  \]
+\item
+  \(f_j(x_j) = 0\) for \(j = 5, \dots, p\).
+\item
+  2 types of outcome: Gaussian (\(\phi=1\)), Binomial
+\item
+  Splines are constructed using 10 knots
+\item
+  50 Iterations
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Comparison \& Metircs}
+\protect\hypertarget{comparison-metircs-1}{}
+\begin{itemize}
+\tightlist
+\item
+  Methods of comparison
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Proposed model BHAM
+  \item
+    Linear LASSO model as the benchmark
+  \item
+    mgcv (S. N. Wood 2004)
+  \item
+    COSSO (Zhang and Lin 2006) and adaptive COSSO(Storlie et al. 2011)
+  \end{itemize}
+\item
+  Metrics
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Out-of-sample deviance \& Concordance
+  \item
+    Variable Selection: positive predictive value (precision), true
+    positive rate (recall), and Matthews correlation coefficient (MCC)
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Prediction Performance}
+\protect\hypertarget{prediction-performance-1}{}
+\begin{itemize}
+\tightlist
+\item
+  Linear LASSO Model performs bad and mgcv performs well
+\item
+  BHAM performs better than COSSO, adaptive COSSO and spikeSlabGAM
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Emipirical Performance: Emory Cardiovascular Biobank}
+\protect\hypertarget{emipirical-performance-emory-cardiovascular-biobank}{}
+\includegraphics[width=\textwidth,height=0.6\textheight]{ECB_bcam_KM.pdf}
+\end{frame}
+
+\hypertarget{r-package-bham}{%
+\subsection{\texorpdfstring{R Package
+\texttt{BHAM}}{R Package BHAM}}\label{r-package-bham}}
+
+\begin{frame}{R Package \texttt{BHAM}}
+\begin{itemize}
+\tightlist
+\item
+  Model formulation for high-dimensional data
+\item
+  Model fitting and tuning
+\item
+  Model summary and variable selection
+\item
+  Spline function visualization
+\item
+  Website via
+  \href{https://boyiguo1.github.io/BHAM/}{\emph{boyiguo1.github.io/BHAM}}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Design Matrix of Spline Fucntions}
+\protect\hypertarget{design-matrix-of-spline-fucntions}{}
+\begin{itemize}
+\tightlist
+\item
+  Flexible spline function formulation for high-dimensional data via
+  \texttt{construct\_smooth\_data}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{spline\_df }\OtherTok{\textless{}{-}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{tribble}\NormalTok{(}
+    \SpecialCharTok{\textasciitilde{}}\NormalTok{Var, }\SpecialCharTok{\textasciitilde{}}\NormalTok{Func, }\SpecialCharTok{\textasciitilde{}}\NormalTok{Args,}
+    \StringTok{"X1"}\NormalTok{,  }\StringTok{"s"}\NormalTok{, }\StringTok{"bs=\textquotesingle{}cr\textquotesingle{}, k=5"}\NormalTok{,}
+    \StringTok{"X2"}\NormalTok{,  }\StringTok{"s"}\NormalTok{, }\ConstantTok{NA}\NormalTok{,}
+    \StringTok{"X3"}\NormalTok{,  }\StringTok{"s"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+\NormalTok{spline\_df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+    \AttributeTok{Var =} \FunctionTok{setdiff}\NormalTok{(}\FunctionTok{names}\NormalTok{(dat), }\StringTok{"y"}\NormalTok{),}
+    \AttributeTok{Func =} \StringTok{"s"}\NormalTok{,}
+    \AttributeTok{Args =}\StringTok{"bs=\textquotesingle{}cr\textquotesingle{}, k=7"}\NormalTok{)}
+\NormalTok{train\_sm\_dat }\OtherTok{\textless{}{-}}\NormalTok{ BHAM}\SpecialCharTok{::}\FunctionTok{construct\_smooth\_data}\NormalTok{(spline\_df, dat)}
+\end{Highlighting}
+\end{Shaded}
+\end{frame}
+
+\begin{frame}[fragile]{Model Fitting Functions}
+\protect\hypertarget{model-fitting-functions}{}
+\begin{itemize}
+\tightlist
+\item
+  Model fitting via \texttt{bamlasso}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Argument \texttt{family} for generalized and survival outcomes
+  \item
+    Argument \texttt{ss} for spike-and-slab LASSO scale parameters
+  \item
+    Argument \texttt{group} for group structures among predictors
+  \end{itemize}
+\item
+  Model tuning via \texttt{tune}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Argument \texttt{nfolds}, \texttt{ncv} for nested cross-validation
+  \item
+    Argument \texttt{s0} for tuning candidates
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Post Fitting Functions}
+\protect\hypertarget{post-fitting-functions}{}
+\begin{itemize}
+\tightlist
+\item
+  Bi-level selection via \texttt{bamlasso\_var\_selection}
+\item
+  Make prediction data for splines \texttt{make\_predict\_dat}
+\item
+  Plot spline functions via \texttt{plot\_smooth\_term}
 \end{itemize}
 \end{frame}
 
@@ -954,7 +1218,9 @@ Question: Can \(Z_j\) be continuous? Can we have a more flexible model?
 \item
   Tensor product of spline functions \[
     B_j(x_{ij}) + B_s(x_{is}) + B_{js}(x_{ij}, x_{is}),
-  \] where
+  \] where \[
+  B_{js}(x_{ij}, x_{is}) = \sum\limits^K_{P\rho=1} \sum\limits^K_{v=1} \beta_{jspv} b_{j\rho}(x_{ij})b_{sv}(x_{is})
+  \]
 \end{itemize}
 
 Question: Can we have a generalized model that accounts fixed effects,
@@ -963,32 +1229,67 @@ nonlinear curves, smooth surfaces, and random effects?
 
 \begin{frame}{Structural Additive Model}
 \protect\hypertarget{structural-additive-model}{}
+High-dimensional structural additive model can be formulated as \[
+g(\mathbb{E}(y_i)) = \bs x_i^T \bs \theta + \bs u_i^T \bs \gamma + B(z_{i1}) + B(z_{i2}, z_{i3}) + B_{spat}(s_i)
+\]
+
+\begin{itemize}
+\tightlist
+\item
+  Un-regularized predictors \(\bs x_i\)
+\item
+  Regularized predictors \(\bs u_i\)
+\item
+  Predictors with nonlinear effects \(\bs z_i\)
+\item
+  Spatial random effects with coordinates \(s_i\)
+\end{itemize}
+
+Spike-and-slab LASSO prior motivates a seamless process of
+variable/functional selection and a scalable optimization-based model
+fitting algorithm
 \end{frame}
 
 \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
 
-\begin{frame}{Conclusion}
+\begin{frame}[fragile]{Conclusion}
 \begin{itemize}
 \tightlist
 \item
-  a
+  Identify challenges in high-dimensional GAM with spline functions
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Balance between signal sparsity and function smoothness
+  \item
+    Bi-level selection to automatically detect linear and nonlinear
+    effects
+  \end{itemize}
 \item
-  b
+  Statistical contribution
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Two-part spike-and-slab LASSO prior for smooth functions
+  \item
+    Scalable EM-Coordinate Descent algorithms for generalized and
+    survival outcomes
+  \item
+    R package \texttt{BHAM}
+  \end{itemize}
 \item
-  c
+  Future Research
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Extension of spike-and-slab LASSO prior in structured additive model
+  \end{itemize}
 \end{itemize}
 \end{frame}
-
-\hypertarget{acknowledgement}{%
-\subsection{Acknowledgement}\label{acknowledgement}}
-
-\begin{frame}{Acknowledgement}
--a -b -c
-\end{frame}
-
-\hypertarget{advocacy}{%
-\subsection{Advocacy}\label{advocacy}}
 
 \hypertarget{references}{%
 \section*{References}\label{references}}
