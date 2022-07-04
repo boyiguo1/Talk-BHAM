@@ -286,24 +286,20 @@ How to model nonlinear effects?
 A \emph{spline} function is a piece-wise polynomial function \[
 B(x) = \sum\limits_{k = 1}^K \beta_k b_k(x) \equiv  \bs X^T \bs \beta
 \] \(b_k(x)\) are the \emph{basis functions}, possibly truncated power
-basis and b-spline basis.
+basis and b-spline basis. (Simon N. Wood 2017)
 \end{column}
 
 \begin{column}{0.48\textwidth}
-\centering
-
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth,height=0.6\textheight]{spline_visual.jpg}
-\caption{A cubic spline function with 2 knots (courtesy of Hastie,
-Tibshirani, and Friedman (2009))}
-\end{figure}
+\includegraphics{phd_defense_slides_files/figure-beamer/plot1-1.pdf}
 \end{column}
 \end{columns}
 
-We defer more information about spline functions to Simon N. Wood (2017)
-
-We assume the knots of the functions are equidistance.
+\begin{itemize}
+\tightlist
+\item
+  For simplicity, we assume all functions have \(k\) basis functions and
+  knots of functions are equidistance.
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Generalized Additive Models with Splines}
@@ -315,7 +311,7 @@ expressed \begin{align*}
 \end{align*} where \(B(x_i)\) is the spline function, \(g(\cdot)\) is a
 link function, \(\phi\) is the dispersion parameter
 
-\vspace*{0.5cm}
+\vspace*{0.2cm}
 
 \begin{itemize}
 \tightlist
@@ -329,13 +325,10 @@ link function, \(\phi\) is the dispersion parameter
 
 \begin{frame}{Problem: Function Smoothness}
 \protect\hypertarget{problem-function-smoothness}{}
-The estimation of \(B(X)\) can be wiggly when the underlying function is
-smooth, particularly as the number of bases ,\(K\), increases.
-
-{[}TODO: add two plots, overfitting and not overfitting{]}
+\includegraphics{phd_defense_slides_files/figure-beamer/spline_overfitting-1.pdf}
 
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
-How to balance function smoothness and complexity?
+How to balance function complexity and signal smoothness?
 \end{tcolorbox}
 \end{frame}
 
@@ -370,20 +363,16 @@ How to balance function smoothness and complexity?
 \protect\hypertarget{problem-multiple-predictor-model}{}
 When a model contains multiple spline functions for variables
 \(X_1, \dots, X_p\), the penalized least square estimator is \[
-\boldsymbol{\hat \beta} = \text{arg}\min \sum\limits^n_{i=1} \sum\limits^n_{i=1} \left[y_i - \beta_0 - \sum\limits \bs X_{ij}^T \bs \beta_j \right]^2 + \lambda_j \bs \beta_j^T \bs S_j \bs\beta_j
+\boldsymbol{\hat \beta} = \text{arg}\min \sum\limits^n_{i=1}  \left[y_i - \beta_0 - \sum\limits_{j=1}^p \bs X_{ij}^T \bs \beta_j \right]^2 + \sum\limits_{j=1}^p\lambda_j \bs \beta_j^T \bs S_j \bs\beta_j
 \]
 
-\emph{How to decide \(\lambda_i\)?}
-
-\begin{itemize}
-\tightlist
-\item
-  Global smoothing, i.e.~\(\lambda_1 = \cdots =\lambda_p\) assumes all
-  functions shares the same shape
-\item
-  Adaptive smoothing, i.e.~examining \(\lambda_i\) combination, are
-  computationally intensive
-\end{itemize}
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+How to choose $\lambda_i$ for $i = 1, \dots, p$?
+  \begin{itemize}
+    \item Global smoothing: $\lambda_1 = \cdots =\lambda_p$
+    \item Adaptive smoothing: unique $\lambda_i$ for $i = 1, \dots, p$
+  \end{itemize}
+\end{tcolorbox}
 \end{frame}
 
 \begin{frame}{Bayesian Regularization}
@@ -430,19 +419,16 @@ Selection}\label{bayesian-variable-selection}}
 \begin{frame}{Problem: Functional Selection}
 \protect\hypertarget{problem-functional-selection}{}
 In the context of variable selection and high-dimensional statistics, we
-always assume some variables are not effective or predictive to the
+always assume some variables are not effective or predictive of the
 outcome.
 
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
 How to statistically detect
-
-\begin{itemize}
-\tightlist
-\item
-  if a variable is predictive to the outcome, \(B_j(X_j) = 0\)
-\item
-  if a variable has a nonlinear relationship with the outcome,
-  \(B_j(X_j) = \beta_j X_j\)
-\end{itemize}
+  \begin{itemize}
+    \item if a variable is predictive to the outcome, $B_j(X_j) = 0$
+    \item if a variable has a nonlinear relationship with the outcome, $B_j(X_j) = \beta_j X_j$
+  \end{itemize}
+\end{tcolorbox}
 
 \emph{Bi-level selection} is the procedure that simultaneously addresses
 the two questions above
@@ -504,8 +490,9 @@ a characterizing structure
 
 \begin{frame}{Problem: High-dimensional Spline Model}
 \protect\hypertarget{problem-high-dimensional-spline-model}{}
-How to jointly model signal sparsity and function smoothness, while
-capable of bi-level selection?
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+How to jointly model signal sparsity and function smoothness, while capable of bi-level selection?
+\end{tcolorbox}
 
 \begin{itemize}
 \tightlist
@@ -531,15 +518,6 @@ capable of bi-level selection?
   \item
     Failed to select function as whole, e.g.~group spike-and-slab LASSO
     prior
-  \end{itemize}
-\item
-  Computational prohibitive algorithms
-
-  \begin{itemize}
-  \tightlist
-  \item
-    MCMC algorithms doesn't scale well for high-dimensional models
-    (Scheipl, Fahrmeir, and Kneib 2012)
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -709,11 +687,8 @@ background/.style={rectangle, fill=gray!10,inner sep=0.2cm, rounded corners=5mm}
 \end{figure}
 \end{frame}
 
-\hypertarget{em-cooridante-descent-algrithm-for-scalable-model-fitting}{%
-\subsection{EM-Cooridante Descent Algrithm for Scalable Model
-Fitting}\label{em-cooridante-descent-algrithm-for-scalable-model-fitting}}
-
 \begin{frame}{EM-Cooridante Descent Algrithm for Scalable Model Fitting}
+\protect\hypertarget{em-cooridante-descent-algrithm-for-scalable-model-fitting}{}
 We are interested in estimating
 \(\Theta = \{\bm \beta, \bm \theta, \phi\}\) using optimization based
 algorithm for scalability purpose
@@ -826,10 +801,8 @@ over all possible values of \(\bm \gamma\)
 \end{itemize}
 \end{frame}
 
-\hypertarget{simulation-study}{%
-\subsection{Simulation Study}\label{simulation-study}}
-
 \begin{frame}{Simulation Study}
+\protect\hypertarget{simulation-study}{}
 \begin{itemize}
 \item
   Follow the data generating process introduced in Bai et al. (2020).
@@ -1020,10 +993,8 @@ Model}\label{additive-cox-proportional-hazards-model}}
 \end{itemize}
 \end{frame}
 
-\hypertarget{simulation-study-1}{%
-\subsection{Simulation Study}\label{simulation-study-1}}
-
 \begin{frame}{Simulation Study}
+\protect\hypertarget{simulation-study-1}{}
 \begin{itemize}
 \item
   Follow the data generating process introduced in Bai et al. (2020).
@@ -1118,8 +1089,7 @@ Model}\label{additive-cox-proportional-hazards-model}}
 \begin{itemize}
 \tightlist
 \item
-  Flexible spline function formulation for high-dimensional data via
-  \texttt{construct\_smooth\_data}
+  Flexible spline function formulation for high-dimensional data
 \end{itemize}
 
 \begin{Shaded}
@@ -1208,7 +1178,11 @@ Model}\label{additive-cox-proportional-hazards-model}}
   Model fitting with EM-Coordinate Descent
 \end{itemize}
 
-Question: Can \(Z_j\) be continuous? Can we have a more flexible model?
+Question:
+
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+  Can $Z_j$ be continuous? Is it possible to have a more flexible model? 
+\end{tcolorbox}
 \end{frame}
 
 \begin{frame}{Smooth Surface Fitting}
@@ -1223,8 +1197,9 @@ Question: Can \(Z_j\) be continuous? Can we have a more flexible model?
   \]
 \end{itemize}
 
-Question: Can we have a generalized model that accounts fixed effects,
-nonlinear curves, smooth surfaces, and random effects?
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+  Can we have a generalized model that accounts fixed effects, nonlinear curves, smooth surfaces, and random effects?
+\end{tcolorbox}
 \end{frame}
 
 \begin{frame}{Structural Additive Model}

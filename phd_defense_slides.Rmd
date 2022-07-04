@@ -22,6 +22,9 @@ bibliography:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
+library(ggplot2)
+library(splines)
 ## target knits Rmds in their own session, so load libraries here.
 # source("here::here(packages.R)")
 ```
@@ -73,18 +76,34 @@ A _spline_ function is a piece-wise polynomial function
 $$
 B(x) = \sum\limits_{k = 1}^K \beta_k b_k(x) \equiv  \bs X^T \bs \beta
 $$
-$b_k(x)$ are the _basis functions_, possibly truncated power basis and b-spline basis.
+$b_k(x)$ are the _basis functions_, possibly truncated power basis and b-spline basis. [@Wood2017] 
 ::::
 
 :::: column
-\centering
-![A cubic spline function with 2 knots (courtesy of @hastie2009elements)](spline_visual.jpg){height=60%}
+<!-- \centering -->
+<!-- ![A cubic spline function with 2 knots (courtesy of @hastie2009elements)](spline_visual.jpg){height=60%} -->
+
+```{r plot1, message=FALSE}
+
+set.seed(1)
+
+x <- seq(-1, 1, 0.01)
+y <- 2*sin(7*x)+rnorm(length(x), 0, 0.5)
+
+ggplot() +
+  geom_point(aes(x, y)) +
+  stat_smooth(aes(x, y, color="Linear"), method="lm", se = FALSE, size = 2) +
+  stat_smooth(aes(x, y, color = "Spline"), method = "gam", se = FALSE, size = 2) +
+  geom_function(fun = ~2*sin(7*.x), group = "C", size = 2, mapping = aes(color = "Data")) +
+  scale_colour_manual("Functions: ",
+                      values=c("Linear" = "#66c2a5","Spline" = "#8da0cb", "Data" = "#fc8d62")) +
+  theme_classic()+
+  theme(legend.position = "top")
+```
 ::::
 :::
 
-We defer more information about spline functions to @Wood2017
-
-We assume the knots of the functions are equidistance.
+* For simplicity, we assume all functions have $k$ basis functions and knots of functions are equidistance.
 
 
 ### Generalized Additive Models with Splines
@@ -96,7 +115,7 @@ __Generalized additive model__ [@Hastie1987] is expressed
 \end{align*}
 where $B(x_i)$ is the spline function, $g(\cdot)$ is a link function, $\phi$ is the dispersion parameter
 
-\vspace*{0.5cm}
+\vspace*{0.2cm}
 
 * Model fitting follows the generalized linear models, e.g. ordinary least square for Gaussian outcome
 $$
@@ -105,12 +124,24 @@ $$
 
 ### Problem: Function Smoothness
 
-The estimation of $B(X)$ can be wiggly when the underlying function is smooth, particularly as the number of bases ,$K$, increases. 
-
-[TODO: add two plots, overfitting and not overfitting]
+<!-- The estimation of $B(X)$ can be wiggly when the underlying function is smooth, particularly as the number of bases ,$K$, increases.  -->
+```{r spline_overfitting, fig.height=2.5}
+mdl_10 <- lm(y ~ bs(x, df = 10))
+mdl_30 <- lm(y ~ bs(x, df = 30))
+mdl_50 <- lm(y ~ bs(x, df = 50))
+ggplot() +
+  geom_point(aes(x = x, y = y)) +
+  geom_line(aes(x = x, y = predict(mdl_10,data.frame(x)), color = "10"), size = 1, alpha = 0.8) +
+  geom_line(aes(x = x, y = predict(mdl_30,data.frame(x)), color = "30"), size = 1, alpha = 0.8) +
+  geom_line(aes(x = x, y = predict(mdl_50,data.frame(x)), color = "50"), size = 1, alpha = 0.8) +
+  theme_classic() +
+  scale_colour_manual("K = ",
+                      values=c("10" = "#66c2a5","30" = "#8da0cb", "50" = "#fc8d62")) +
+theme(legend.position = "top")
+```
 
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
-How to balance function smoothness and complexity?
+How to balance function complexity and signal smoothness?
 \end{tcolorbox}
 
 ## Bayesian Regularization
@@ -132,13 +163,16 @@ $$
 
 When a model contains multiple spline functions for variables $X_1, \dots, X_p$, the penalized least square estimator is
 $$
-\boldsymbol{\hat \beta} = \text{arg}\min \sum\limits^n_{i=1} \sum\limits^n_{i=1} \left[y_i - \beta_0 - \sum\limits \bs X_{ij}^T \bs \beta_j \right]^2 + \lambda_j \bs \beta_j^T \bs S_j \bs\beta_j
+\boldsymbol{\hat \beta} = \text{arg}\min \sum\limits^n_{i=1}  \left[y_i - \beta_0 - \sum\limits_{j=1}^p \bs X_{ij}^T \bs \beta_j \right]^2 + \sum\limits_{j=1}^p\lambda_j \bs \beta_j^T \bs S_j \bs\beta_j
 $$
 
-_How to decide $\lambda_i$?_
-
-* Global smoothing, i.e. $\lambda_1 = \cdots =\lambda_p$ assumes all functions shares the same shape
-* Adaptive smoothing, i.e. examining $\lambda_i$ combination, are computationally intensive
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+How to choose $\lambda_i$ for $i = 1, \dots, p$?
+  \begin{itemize}
+    \item Global smoothing: $\lambda_1 = \cdots =\lambda_p$
+    \item Adaptive smoothing: unique $\lambda_i$ for $i = 1, \dots, p$
+  \end{itemize}
+\end{tcolorbox}
 
 ### Bayesian Regularization
 
@@ -158,12 +192,15 @@ _How to decide $\lambda_i$?_
 
 ## Bayesian Variable Selection
 ### Problem: Functional Selection
-In the context of variable selection and high-dimensional statistics, we always assume some variables are not effective or predictive to the outcome.
+In the context of variable selection and high-dimensional statistics, we always assume some variables are not effective or predictive of the outcome.
 
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
 How to statistically detect
-
-* if a variable is predictive to the outcome, $B_j(X_j) = 0$
-* if a variable has a nonlinear relationship with the outcome, $B_j(X_j) = \beta_j X_j$
+  \begin{itemize}
+    \item if a variable is predictive to the outcome, $B_j(X_j) = 0$
+    \item if a variable has a nonlinear relationship with the outcome, $B_j(X_j) = \beta_j X_j$
+  \end{itemize}
+\end{tcolorbox}
 
 _Bi-level selection_ is the procedure that simultaneously addresses the two questions above
 
@@ -194,7 +231,9 @@ Spike-and-slab priors are a family of mixture distributions that deploys a chara
 
 ### Problem: High-dimensional Spline Model
 
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
 How to jointly model signal sparsity and function smoothness, while capable of bi-level selection?
+\end{tcolorbox}
 
 * Excess shrinkage due to ignoring smooth penalty completely
     * Group lasso penalty [@Ravikumar2009; @Huang2010], group SCAD penalty [@Wang2007; @Xue2009]
@@ -203,9 +242,6 @@ How to jointly model signal sparsity and function smoothness, while capable of b
 * All-in-all-out selection
     * Can not detect if a function is linear, e.g. spike-and-slab grouped LASSO prior [@Bai2020; @Bai2021]
     * Failed to select function as whole, e.g. group spike-and-slab LASSO prior
-
-* Computational prohibitive algorithms
-    * MCMC algorithms doesn't scale well for high-dimensional models [@Scheipl2012]
 
 # Dissertation
 
@@ -324,7 +360,7 @@ background/.style={rectangle, fill=gray!10,inner sep=0.2cm, rounded corners=5mm}
 }
 \end{figure}
 
-## EM-Cooridante Descent Algrithm for Scalable Model Fitting
+### EM-Cooridante Descent Algrithm for Scalable Model Fitting
 
 We are interested in estimating $\Theta = \{\bm \beta, \bm \theta, \phi\}$ using optimization based algorithm for scalability purpose
 
@@ -369,7 +405,7 @@ $$Q_2 \equiv Q_2(\bs\gamma,\bs\theta) = \sum\limits_{j=1}^{p} \left[ (\gamma_j+\
 * Cross-validation to choose optimal value for $s_0$
 
 
-## Simulation Study
+### Simulation Study
 * Follow the data generating process introduced in @Bai2020. 
 * $n_{train} = 500$, $n_{test}=1000$
 * $p=4, 10, 50, 200$
@@ -451,7 +487,7 @@ $$
   * Use Coordinate Descent to fit the penalized model in $E(Q_1)$ to update $\beta, \phi$ 
   * Closed form calculation via $E(Q_2)$ to update $\theta$
 
-## Simulation Study
+### Simulation Study
 * Follow the data generating process introduced in @Bai2020. 
 * $n_{train} = 500$, $n_{test}=1000$
 * $p=4, 10, 50, 200$
@@ -492,7 +528,7 @@ $$
   - Website via [_boyiguo1.github.io/BHAM_](https://boyiguo1.github.io/BHAM/)
   
 ### Design Matrix of Spline Fucntions
-  - Flexible spline function formulation for high-dimensional data via `construct_smooth_data`
+  - Flexible spline function formulation for high-dimensional data
   ```{r echo = T, eval= F}
   spline_df <- dplyr::tribble(
       ~Var, ~Func, ~Args,
@@ -530,7 +566,11 @@ $$
   * Replace each smooth function $B(z_{ij})$ with $B(z_{ij})x_{ij}\equiv \bs (x_{ij}\bs Z_{ij}^T)\bs \beta_j$
   * Model fitting with EM-Coordinate Descent
   
-Question: Can $Z_j$ be continuous? Can we have a more flexible model? 
+Question: 
+
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+  Can $Z_j$ be continuous? Is it possible to have a more flexible model? 
+\end{tcolorbox}
 
 ### Smooth Surface Fitting
 * Tensor product of spline functions
@@ -542,8 +582,9 @@ $$
 B_{js}(x_{ij}, x_{is}) = \sum\limits^K_{P\rho=1} \sum\limits^K_{v=1} \beta_{jspv} b_{j\rho}(x_{ij})b_{sv}(x_{is})
 $$
 
-
-Question: Can we have a generalized model that accounts fixed effects, nonlinear curves, smooth surfaces, and random effects?
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+  Can we have a generalized model that accounts fixed effects, nonlinear curves, smooth surfaces, and random effects?
+\end{tcolorbox}
 
 ### Structural Additive Model
 High-dimensional structural additive model can be formulated as
