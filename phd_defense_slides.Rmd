@@ -45,13 +45,15 @@ library(splines)
     * Bayesian Regularization
     * Bayesian Variable Selection
 * Dissertation
-    * Two-part Spike-and-slab LASSO Prior for Spline Functions
-    * EM-Coordinate Descent Algorithms
-    * Empirical Performance of Prediction & Selection
-* Future Research
-    * Structured Additive Regression with Spike-and-Slab LASSO prior
-    * Spatially Variable Genes Screening
-    * Other Questions of Interest
+    * Bayesian Hierarchical Additive Models
+    * Additive Cox Proportional Hazards Model
+    * R package `BHAM`
+* Conclusion
+    * Future Research
+    * Questions & Answers
+    * Closing Statement & Acknowledgment
+    <!-- * Spatially Variable Genes Screening -->
+    <!-- * Other Questions of Interest -->
 
 # Background
 
@@ -103,7 +105,9 @@ ggplot() +
 ::::
 :::
 
-* For simplicity, we assume all functions have $k$ basis functions and knots of functions are equidistance.
+* For simplicity, we assume all functions have $K$ basis functions and knots of functions are equidistance.
+
+<!-- Note: The number of basis function $K$ decides the smoothness of the spline function -->
 
 
 ### Generalized Additive Models with Splines
@@ -124,25 +128,29 @@ $$
 
 ### Problem: Function Smoothness
 
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
+How to decide $K$, the number of basis function ?
+\end{tcolorbox}
+
+<!-- In other words, how to balance function complexity and signal smoothness? -->
+
 <!-- The estimation of $B(X)$ can be wiggly when the underlying function is smooth, particularly as the number of bases ,$K$, increases.  -->
 ```{r spline_overfitting, fig.height=2.5}
+mdl_3 <- lm(y ~ bs(x, df = 3))
 mdl_10 <- lm(y ~ bs(x, df = 10))
-mdl_30 <- lm(y ~ bs(x, df = 30))
 mdl_50 <- lm(y ~ bs(x, df = 50))
 ggplot() +
   geom_point(aes(x = x, y = y)) +
+  geom_line(aes(x = x, y = predict(mdl_3,data.frame(x)), color = "3"), size = 1, alpha = 0.8) +
   geom_line(aes(x = x, y = predict(mdl_10,data.frame(x)), color = "10"), size = 1, alpha = 0.8) +
-  geom_line(aes(x = x, y = predict(mdl_30,data.frame(x)), color = "30"), size = 1, alpha = 0.8) +
   geom_line(aes(x = x, y = predict(mdl_50,data.frame(x)), color = "50"), size = 1, alpha = 0.8) +
   theme_classic() +
   scale_colour_manual("K = ",
-                      values=c("10" = "#66c2a5","30" = "#8da0cb", "50" = "#fc8d62")) +
+                      values=c("3" = "#66c2a5","10" = "#8da0cb", "50" = "#fc8d62")) +
 theme(legend.position = "top")
 ```
 
-\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
-How to balance function complexity and signal smoothness?
-\end{tcolorbox}
+
 
 ## Bayesian Regularization
 
@@ -176,19 +184,18 @@ How to choose $\lambda_i$ for $i = 1, \dots, p$?
 
 ### Bayesian Regularization
 
-* Bayesian Regularization is the Bayesian analogy of penalized models by using regularizing priors
-  * Bayesian ridge via normal prior
+* Bayesian regularization is the Bayesian analogy of penalized models by using regularizing priors
   $$
-   \beta \sim N(0, \tau^2) \rightarrow  \lambda = \sigma^2/\tau^2
+   \text{Bayesian ridge:} \quad \beta \sim N(0, \tau^2) \rightarrow  \lambda = \sigma^2/\tau^2
   $$
-  
+  <!-- \sigma^2 is the variance of residual in a gaussian model -->
 * Adaptive shrinkage with hierarchical priors
   $$
    \tau^2_j \simiid IG(a, b)
   $$
-  * Adaptive Smoothing
-    * Random walk prior on b-spline bases with IG hyperprior
-    * Normal prior on truncated power bases with a log-normal spline model for variance
+* Adaptive smoothing
+  * Random walk prior on b-spline bases with IG hyperprior
+  * Normal prior on truncated power bases with a log-normal spline model for variance
 
 ## Bayesian Variable Selection
 ### Problem: Functional Selection
@@ -208,7 +215,7 @@ _Bi-level selection_ is the procedure that simultaneously addresses the two ques
 ### Spike-and-Slab Priors
 Spike-and-slab priors are a family of mixture distributions that deploys a characterizing structure
   $$\beta|\gamma \sim (1-\gamma)f_{spike}(\beta) + \gamma f_{slab}(\beta)$$
-
+  
   * Latent indicator $\gamma$ follows a Bernoulli distribution with probability $\theta$
   * Spike density $f_{spike}(x)$ concentrates around 0 for small effects
   * Slab density $f_{slab}(x)$ is a flat density for large effects
@@ -219,15 +226,13 @@ Spike-and-slab priors are a family of mixture distributions that deploys a chara
 ### Spike-and-Slab LASSO Priors
 * Double exponential distributions as the spike and slab distributions
   $$\beta|\gamma \sim (1-\gamma)DE(0, s_0) + \gamma DE(0, s_1), 0 < s_0 < s_1$$
-  * Seamless variable selection as coefficients shrinkage to 0
   * Computation advantages via Expectation-Maximization (EM) algorithms
+  * Seamless variable selection as coefficients shrinkage to 0
   
 * Group spike-and-slab LASSO
   * Structure underlying predictors, e.g. gene pathways, bases of a spline function
-  * Structured prior on $\gamma$
-  $$
-  \gamma_k | \theta_j ~ Binomial(1, \theta_j), k \in j
-  $$
+  * Structured prior $\gamma_k | \theta_j \simiid Binomial(1, \theta_j), k \in j$
+
 
 ### Problem: High-dimensional Spline Model
 
@@ -237,7 +242,7 @@ How to jointly model signal sparsity and function smoothness, while capable of b
 
 * Excess shrinkage due to ignoring smooth penalty completely
     * Group lasso penalty [@Ravikumar2009; @Huang2010], group SCAD penalty [@Wang2007; @Xue2009]
-    * Global penalty VS adaptive penalty
+    <!-- * Global penalty VS adaptive penalty -->
 
 * All-in-all-out selection
     * Can not detect if a function is linear, e.g. spike-and-slab grouped LASSO prior [@Bai2020; @Bai2021]
@@ -490,13 +495,13 @@ $$
 ### Simulation Study
 * Follow the data generating process introduced in @Bai2020. 
 * $n_{train} = 500$, $n_{test}=1000$
-* $p=4, 10, 50, 200$
+* $p=4, 10, 50, 100, 200$
+* Survival and censoring time follow Weibull distribution
 $$
-\mu = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
+  \log \eta = (x_1 + 1)^2/5 + \exp (x_2 + 1)/25 + 3\text{sin} (x_3)/2 + (1.4x_4 + 0.5)/2
 $$
 
-* $f_j(x_j) = 0$ for $j = 5, \dots, p$.
-* 2 types of outcome: Gaussian ($\phi=1$), Binomial
+* Censoring rate is controlled at \{0.15, 0.3, 0.45\}
 * Splines are constructed using 10 knots
 * 50 Iterations
 
@@ -509,16 +514,29 @@ $$
 
 * Metrics
   * Out-of-sample deviance & Concordance
-  * Variable Selection: positive predictive value (precision), true positive rate (recall), and Matthews correlation coefficient (MCC)
   
 ### Prediction Performance
 
-* Linear LASSO Model performs bad and mgcv performs well
-* BHAM performs better than COSSO, adaptive COSSO and spikeSlabGAM
+* Linear LASSO Model performs bad in general
+* Low dimensional settings:
+  * mgcv performs the best 
+  * BHAM performs as good as mgcv 
+* High dimensional setting:
+  * BHAM performs better than COSSO models as p increases and more censoring events
 
 ### Emipirical Performance: Emory Cardiovascular Biobank
+::: columns
+:::: column
+* predicting all-cause mortality among patents undergoing cardiac catheterization
+* Sample size N=454 and number of features p=200
+* 5-knot cubic spline
+::::
 
+:::: column
 ![](ECB_bcam_KM.pdf){height=60%}
+::::
+:::
+
 
 ## R Package `BHAM`
   - Model formulation for high-dimensional data
@@ -566,8 +584,6 @@ $$
   * Replace each smooth function $B(z_{ij})$ with $B(z_{ij})x_{ij}\equiv \bs (x_{ij}\bs Z_{ij}^T)\bs \beta_j$
   * Model fitting with EM-Coordinate Descent
   
-Question: 
-
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
   Can $Z_j$ be continuous? Is it possible to have a more flexible model? 
 \end{tcolorbox}
@@ -575,12 +591,12 @@ Question:
 ### Smooth Surface Fitting
 * Tensor product of spline functions
   $$
+  B_{js}(x_{ij}, x_{is}) = \sum\limits^K_{P\rho=1} \sum\limits^K_{v=1} \beta_{jspv} b_{j\rho}(x_{ij})b_{sv}(x_{is})
+  $$
+* Smooth Surface
+  $$
     B_j(x_{ij}) + B_s(x_{is}) + B_{js}(x_{ij}, x_{is}),
   $$
-where 
-$$
-B_{js}(x_{ij}, x_{is}) = \sum\limits^K_{P\rho=1} \sum\limits^K_{v=1} \beta_{jspv} b_{j\rho}(x_{ij})b_{sv}(x_{is})
-$$
 
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
   Can we have a generalized model that accounts fixed effects, nonlinear curves, smooth surfaces, and random effects?
@@ -611,10 +627,32 @@ Spike-and-slab LASSO prior motivates a seamless process of variable/functional s
 * Future Research
   * Extension of spike-and-slab LASSO prior in structured additive model
 
-<!-- ## Acknowledgement -->
-<!-- -a -->
-<!-- -b -->
-<!-- -c -->
+## Acknowledgement
+
+I would like to thank
+
+::: columns
+:::: column
+* Dissertation Committee
+* Biostatistics Department
+  * Faculty
+  * Staff
+  * Students
+* School of Public Health
+  * Friends
+  * PHSA
+::::
+:::: column
+* REGARDS Research Group
+  * PIs
+  * Analytic Team
+  * Collaborators
+
+* Graduate Student Government
+::::
+:::
+
+
 
 <!-- ## Advocacy -->
 <!-- -a -->

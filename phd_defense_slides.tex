@@ -169,6 +169,7 @@
 \usepackage{bm}
 \usepackage{tcolorbox}
 
+
 \usetikzlibrary{shapes.geometric, arrows, positioning, calc, matrix, backgrounds, fit}
 \newcommand{\bs}[1]{\boldsymbol{#1}}
 \newcommand{\tp}{*}
@@ -216,7 +217,7 @@ University of Alabama at Birmingham}
 \hypertarget{outline}{%
 \section*{Outline}\label{outline}}
 
-\begin{frame}{Outline}
+\begin{frame}[fragile]{Outline}
 \begin{itemize}
 \tightlist
 \item
@@ -237,23 +238,23 @@ University of Alabama at Birmingham}
   \begin{itemize}
   \tightlist
   \item
-    Two-part Spike-and-slab LASSO Prior for Spline Functions
+    Bayesian Hierarchical Additive Models
   \item
-    EM-Coordinate Descent Algorithms
+    Additive Cox Proportional Hazards Model
   \item
-    Empirical Performance of Prediction \& Selection
+    R package \texttt{BHAM}
   \end{itemize}
 \item
-  Future Research
+  Conclusion
 
   \begin{itemize}
   \tightlist
   \item
-    Structured Additive Regression with Spike-and-Slab LASSO prior
+    Future Research
   \item
-    Spatially Variable Genes Screening
+    Questions \& Answers
   \item
-    Other Questions of Interest
+    Closing Statement \& Acknowledgment
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -297,7 +298,7 @@ basis and b-spline basis. (Simon N. Wood 2017)
 \begin{itemize}
 \tightlist
 \item
-  For simplicity, we assume all functions have \(k\) basis functions and
+  For simplicity, we assume all functions have \(K\) basis functions and
   knots of functions are equidistance.
 \end{itemize}
 \end{frame}
@@ -325,11 +326,11 @@ link function, \(\phi\) is the dispersion parameter
 
 \begin{frame}{Problem: Function Smoothness}
 \protect\hypertarget{problem-function-smoothness}{}
-\includegraphics{phd_defense_slides_files/figure-beamer/spline_overfitting-1.pdf}
-
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
-How to balance function complexity and signal smoothness?
+How to decide $K$, the number of basis function ?
 \end{tcolorbox}
+
+\includegraphics{phd_defense_slides_files/figure-beamer/spline_overfitting-1.pdf}
 \end{frame}
 
 \hypertarget{bayesian-regularization}{%
@@ -380,34 +381,24 @@ How to choose $\lambda_i$ for $i = 1, \dots, p$?
 \begin{itemize}
 \tightlist
 \item
-  Bayesian Regularization is the Bayesian analogy of penalized models by
-  using regularizing priors
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Bayesian ridge via normal prior \[
-     \beta \sim N(0, \tau^2) \rightarrow  \lambda = \sigma^2/\tau^2
-    \]
-  \end{itemize}
+  Bayesian regularization is the Bayesian analogy of penalized models by
+  using regularizing priors \[
+   \text{Bayesian ridge:} \quad \beta \sim N(0, \tau^2) \rightarrow  \lambda = \sigma^2/\tau^2
+  \]
 \item
   Adaptive shrinkage with hierarchical priors \[
    \tau^2_j \simiid IG(a, b)
   \]
+\item
+  Adaptive smoothing
 
   \begin{itemize}
   \tightlist
   \item
-    Adaptive Smoothing
-
-    \begin{itemize}
-    \tightlist
-    \item
-      Random walk prior on b-spline bases with IG hyperprior
-    \item
-      Normal prior on truncated power bases with a log-normal spline
-      model for variance
-    \end{itemize}
+    Random walk prior on b-spline bases with IG hyperprior
+  \item
+    Normal prior on truncated power bases with a log-normal spline model
+    for variance
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -468,9 +459,9 @@ a characterizing structure
   \begin{itemize}
   \tightlist
   \item
-    Seamless variable selection as coefficients shrinkage to 0
-  \item
     Computation advantages via Expectation-Maximization (EM) algorithms
+  \item
+    Seamless variable selection as coefficients shrinkage to 0
   \end{itemize}
 \item
   Group spike-and-slab LASSO
@@ -481,9 +472,8 @@ a characterizing structure
     Structure underlying predictors, e.g.~gene pathways, bases of a
     spline function
   \item
-    Structured prior on \(\gamma\) \[
-    \gamma_k | \theta_j ~ Binomial(1, \theta_j), k \in j
-    \]
+    Structured prior
+    \(\gamma_k | \theta_j \simiid Binomial(1, \theta_j), k \in j\)
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -504,8 +494,6 @@ How to jointly model signal sparsity and function smoothness, while capable of b
   \item
     Group lasso penalty (Ravikumar et al. 2009; Huang, Horowitz, and Wei
     2010), group SCAD penalty (Wang, Chen, and Li 2007; Xue 2009)
-  \item
-    Global penalty VS adaptive penalty
   \end{itemize}
 \item
   All-in-all-out selection
@@ -1001,13 +989,13 @@ Model}\label{additive-cox-proportional-hazards-model}}
 \item
   \(n_{train} = 500\), \(n_{test}=1000\)
 \item
-  \(p=4, 10, 50, 200\) \[
-  \mu = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
+  \(p=4, 10, 50, 100, 200\)
+\item
+  Survival and censoring time follow Weibull distribution \[
+  \log \eta = (x_1 + 1)^2/5 + \exp (x_2 + 1)/25 + 3\text{sin} (x_3)/2 + (1.4x_4 + 0.5)/2
   \]
 \item
-  \(f_j(x_j) = 0\) for \(j = 5, \dots, p\).
-\item
-  2 types of outcome: Gaussian (\(\phi=1\)), Binomial
+  Censoring rate is controlled at \{0.15, 0.3, 0.45\}
 \item
   Splines are constructed using 10 knots
 \item
@@ -1040,9 +1028,6 @@ Model}\label{additive-cox-proportional-hazards-model}}
   \tightlist
   \item
     Out-of-sample deviance \& Concordance
-  \item
-    Variable Selection: positive predictive value (precision), true
-    positive rate (recall), and Matthews correlation coefficient (MCC)
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -1052,15 +1037,49 @@ Model}\label{additive-cox-proportional-hazards-model}}
 \begin{itemize}
 \tightlist
 \item
-  Linear LASSO Model performs bad and mgcv performs well
+  Linear LASSO Model performs bad in general
 \item
-  BHAM performs better than COSSO, adaptive COSSO and spikeSlabGAM
+  Low dimensional settings:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    mgcv performs the best
+  \item
+    BHAM performs as good as mgcv
+  \end{itemize}
+\item
+  High dimensional setting:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    BHAM performs better than COSSO models as p increases and more
+    censoring events
+  \end{itemize}
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Emipirical Performance: Emory Cardiovascular Biobank}
 \protect\hypertarget{emipirical-performance-emory-cardiovascular-biobank}{}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+\tightlist
+\item
+  predicting all-cause mortality among patents undergoing cardiac
+  catheterization
+\item
+  Sample size N=454 and number of features p=200
+\item
+  5-knot cubic spline
+\end{itemize}
+\end{column}
+
+\begin{column}{0.48\textwidth}
 \includegraphics[width=\textwidth,height=0.6\textheight]{ECB_bcam_KM.pdf}
+\end{column}
+\end{columns}
 \end{frame}
 
 \hypertarget{r-package-bham}{%
@@ -1178,8 +1197,6 @@ Model}\label{additive-cox-proportional-hazards-model}}
   Model fitting with EM-Coordinate Descent
 \end{itemize}
 
-Question:
-
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
   Can $Z_j$ be continuous? Is it possible to have a more flexible model? 
 \end{tcolorbox}
@@ -1191,9 +1208,11 @@ Question:
 \tightlist
 \item
   Tensor product of spline functions \[
-    B_j(x_{ij}) + B_s(x_{is}) + B_{js}(x_{ij}, x_{is}),
-  \] where \[
   B_{js}(x_{ij}, x_{is}) = \sum\limits^K_{P\rho=1} \sum\limits^K_{v=1} \beta_{jspv} b_{j\rho}(x_{ij})b_{sv}(x_{is})
+  \]
+\item
+  Smooth Surface \[
+    B_j(x_{ij}) + B_s(x_{is}) + B_{js}(x_{ij}, x_{is}),
   \]
 \end{itemize}
 
@@ -1264,6 +1283,65 @@ fitting algorithm
     Extension of spike-and-slab LASSO prior in structured additive model
   \end{itemize}
 \end{itemize}
+\end{frame}
+
+\hypertarget{acknowledgement}{%
+\subsection{Acknowledgement}\label{acknowledgement}}
+
+\begin{frame}{Acknowledgement}
+I would like to thank
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+\tightlist
+\item
+  Dissertation Committee
+\item
+  Biostatistics Department
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Faculty
+  \item
+    Staff
+  \item
+    Students
+  \end{itemize}
+\item
+  School of Public Health
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Friends
+  \item
+    PHSA
+  \end{itemize}
+\end{itemize}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+\tightlist
+\item
+  REGARDS Research Group
+
+  \begin{itemize}
+  \tightlist
+  \item
+    PIs
+  \item
+    Analytic Team
+  \item
+    Collaborators
+  \end{itemize}
+\item
+  Graduate Student Government
+\end{itemize}
+\end{column}
+\end{columns}
 \end{frame}
 
 \hypertarget{references}{%
