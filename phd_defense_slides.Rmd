@@ -130,7 +130,7 @@ $$
 ### Problem: Function Smoothness
 
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
-How to mathematically define and estimate the smoothness of spline functions?
+How to mathematically define and estimate the smoothness of spline models?
 \end{tcolorbox}
 
 <!-- In other words, how to balance function complexity and signal smoothness? -->
@@ -246,7 +246,7 @@ How to jointly model signal sparsity and function smoothness, while capable of b
     <!-- * Global penalty VS adaptive penalty -->
 
 * All-in-all-out selection
-    * Failed to select function as whole, e.g. group spike-and-slab LASSO prior
+    * Failed to select function as a whole, e.g. group spike-and-slab LASSO prior
     * Can not detect if a function is linear, e.g. spike-and-slab grouped LASSO prior [@Bai2020; @Bai2021]
 
 
