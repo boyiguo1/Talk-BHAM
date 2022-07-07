@@ -195,8 +195,8 @@ How to choose $\lambda_i$ for $i = 1, \dots, p$?
    \tau^2_j \simiid IG(a, b)
   $$
 * Adaptive smoothing
-  * Random walk prior on b-spline bases with IG hyperprior
-  * Normal prior on truncated power bases with a log-normal spline model for variance
+  * Random walk prior on b-spline bases with IG hyperprior [@Lang2004]
+  * Log-normal spline model for coefficient variance [@Baladandayuthapani2005]
 
 ## Bayesian Variable Selection
 ### Problem: Functional Selection
@@ -230,8 +230,8 @@ Spike-and-slab priors are a family of mixture distributions that deploys a chara
   * Computation advantages via Expectation-Maximization (EM) algorithms
   * Seamless variable selection as coefficients shrinkage to 0
   
-* Group spike-and-slab LASSO
-  * Structure underlying predictors, e.g. gene pathways, bases of a spline function
+* Group spike-and-slab LASSO prior
+  * Structure among predictors, e.g. gene pathways, bases of a spline function
   * Structured prior $\gamma_k | \theta_j \simiid Binomial(1, \theta_j), k \in j$
 
 
@@ -241,13 +241,14 @@ Spike-and-slab priors are a family of mixture distributions that deploys a chara
 How to jointly model signal sparsity and function smoothness, while capable of bi-level selection?
 \end{tcolorbox}
 
-* Excess shrinkage due to ignoring smooth penalty completely
+* Excess shrinkage due to negligence of smooth penalty
     * Group lasso penalty [@Ravikumar2009; @Huang2010], group SCAD penalty [@Wang2007; @Xue2009]
     <!-- * Global penalty VS adaptive penalty -->
 
 * All-in-all-out selection
-    * Can not detect if a function is linear, e.g. spike-and-slab grouped LASSO prior [@Bai2020; @Bai2021]
     * Failed to select function as whole, e.g. group spike-and-slab LASSO prior
+    * Can not detect if a function is linear, e.g. spike-and-slab grouped LASSO prior [@Bai2020; @Bai2021]
+
 
 # Dissertation
 
@@ -268,7 +269,7 @@ How to jointly model signal sparsity and function smoothness, while capable of b
 
 * \textbf{Guo, B.}, Yi, N. (2022). `BHAM`: An R Package to Fit Bayesian Hierarchical Additive Models for High-dimensional Data Analysis _Work in Progress_
 
-## Two-part Spike-and-slab LASSO (SSL) Prior for Smooth Functions
+## Bayesian Hierarchical Additive Models
 ### Generalized Additive Model
 Given the data $\{y_i, x_{i1}, \dots ,x_{ip}\}_{i=1}^n$ where $p >> n$
 \begin{align*}
@@ -278,8 +279,8 @@ g(\mu_i) &= \beta_0 + \sum\limits^p_{j=1}B_j(x_{ij}) , \quad i = 1, \dots, n.
 
 
 
-### Smoothing Function Reparameterization
-* Smoothing penalty from Smoothing spline regression [@Wood2017]
+### Spline Function Reparameterization
+* Smoothing penalty from smoothing spline regression [@Wood2017]
 $$
 \lambda_j \int B^{\prime\prime}_j(x)dx = \lambda_j \bs \beta_j^T \bs S_j \bs \beta_j,
 $$
@@ -582,7 +583,7 @@ $$
   * Assume the coefficient of a variable $X_j$ is a function of a covariate $Z_j$
     * linear model: $\beta(Z_j) = \beta$
     * VC model: $\beta(Z_j) = B(Z_j)$
-  * Replace each smooth function $B(z_{ij})$ with $B(z_{ij})x_{ij}\equiv \bs (x_{ij}\bs Z_{ij}^T)\bs \beta_j$
+  * Replace each spline function $B(z_{ij})$ with $B(z_{ij})x_{ij}\equiv \bs (x_{ij}\bs Z_{ij}^T)\bs \beta_j$
   * Model fitting with EM-Coordinate Descent
   
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
@@ -622,7 +623,7 @@ Spike-and-slab LASSO prior motivates a seamless process of variable/functional s
   * Balance between signal sparsity and function smoothness
   * Bi-level selection to automatically detect linear and nonlinear effects
 * Statistical contribution
-  * Two-part spike-and-slab LASSO prior for smooth functions
+  * Two-part spike-and-slab LASSO prior for spline functions
   * Scalable EM-Coordinate Descent algorithms for generalized and survival outcomes
   * R package `BHAM`
 * Future Research

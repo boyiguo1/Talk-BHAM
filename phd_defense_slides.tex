@@ -395,10 +395,11 @@ How to choose $\lambda_i$ for $i = 1, \dots, p$?
   \begin{itemize}
   \tightlist
   \item
-    Random walk prior on b-spline bases with IG hyperprior
+    Random walk prior on b-spline bases with IG hyperprior (Lang and
+    Brezger 2004)
   \item
-    Normal prior on truncated power bases with a log-normal spline model
-    for variance
+    Log-normal spline model for coefficient variance
+    (Baladandayuthapani, Mallick, and Carroll 2005)
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -464,13 +465,13 @@ a characterizing structure
     Seamless variable selection as coefficients shrinkage to 0
   \end{itemize}
 \item
-  Group spike-and-slab LASSO
+  Group spike-and-slab LASSO prior
 
   \begin{itemize}
   \tightlist
   \item
-    Structure underlying predictors, e.g.~gene pathways, bases of a
-    spline function
+    Structure among predictors, e.g.~gene pathways, bases of a spline
+    function
   \item
     Structured prior
     \(\gamma_k | \theta_j \simiid Binomial(1, \theta_j), k \in j\)
@@ -487,7 +488,7 @@ How to jointly model signal sparsity and function smoothness, while capable of b
 \begin{itemize}
 \tightlist
 \item
-  Excess shrinkage due to ignoring smooth penalty completely
+  Excess shrinkage due to negligence of smooth penalty
 
   \begin{itemize}
   \tightlist
@@ -501,11 +502,11 @@ How to jointly model signal sparsity and function smoothness, while capable of b
   \begin{itemize}
   \tightlist
   \item
-    Can not detect if a function is linear, e.g.~spike-and-slab grouped
-    LASSO prior (Bai et al. 2020; Bai 2021)
-  \item
     Failed to select function as whole, e.g.~group spike-and-slab LASSO
     prior
+  \item
+    Can not detect if a function is linear, e.g.~spike-and-slab grouped
+    LASSO prior (Bai et al. 2020; Bai 2021)
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -556,9 +557,9 @@ How to jointly model signal sparsity and function smoothness, while capable of b
 \end{itemize}
 \end{frame}
 
-\hypertarget{two-part-spike-and-slab-lasso-ssl-prior-for-smooth-functions}{%
-\subsection{Two-part Spike-and-slab LASSO (SSL) Prior for Smooth
-Functions}\label{two-part-spike-and-slab-lasso-ssl-prior-for-smooth-functions}}
+\hypertarget{bayesian-hierarchical-additive-models}{%
+\subsection{Bayesian Hierarchical Additive
+Models}\label{bayesian-hierarchical-additive-models}}
 
 \begin{frame}{Generalized Additive Model}
 \protect\hypertarget{generalized-additive-model}{}
@@ -569,11 +570,11 @@ g(\mu_i) &= \beta_0 + \sum\limits^p_{j=1}B_j(x_{ij}) , \quad i = 1, \dots, n.
 \end{align*}
 \end{frame}
 
-\begin{frame}{Smoothing Function Reparameterization}
-\protect\hypertarget{smoothing-function-reparameterization}{}
+\begin{frame}{Spline Function Reparameterization}
+\protect\hypertarget{spline-function-reparameterization}{}
 \begin{itemize}
 \item
-  Smoothing penalty from Smoothing spline regression (Simon N. Wood
+  Smoothing penalty from smoothing spline regression (Simon N. Wood
   2017) \[
   \lambda_j \int B^{\prime\prime}_j(x)dx = \lambda_j \bs \beta_j^T \bs S_j \bs \beta_j,
   \] where \(S_j\) is a known smoothing penalty matrix.
@@ -1191,7 +1192,7 @@ Model}\label{additive-cox-proportional-hazards-model}}
     VC model: \(\beta(Z_j) = B(Z_j)\)
   \end{itemize}
 \item
-  Replace each smooth function \(B(z_{ij})\) with
+  Replace each spline function \(B(z_{ij})\) with
   \(B(z_{ij})x_{ij}\equiv \bs (x_{ij}\bs Z_{ij}^T)\bs \beta_j\)
 \item
   Model fitting with EM-Coordinate Descent
@@ -1267,7 +1268,7 @@ fitting algorithm
   \begin{itemize}
   \tightlist
   \item
-    Two-part spike-and-slab LASSO prior for smooth functions
+    Two-part spike-and-slab LASSO prior for spline functions
   \item
     Scalable EM-Coordinate Descent algorithms for generalized and
     survival outcomes
@@ -1362,6 +1363,12 @@ Boland. 2020. {``Spike-and-Slab Group Lassos for Grouped Regression and
 Sparse Generalized Additive Models.''} \emph{Journal of the American
 Statistical Association}, 1--14.
 
+\leavevmode\vadjust pre{\hypertarget{ref-Baladandayuthapani2005}{}}%
+Baladandayuthapani, Veerabhadran, Bani K. Mallick, and Raymond J.
+Carroll. 2005. {``Spatially Adaptive Bayesian Penalized Regression
+Splines (p-Splines).''} \emph{Journal of Computational and Graphical
+Statistics} 14 (2): 378--94.
+
 \leavevmode\vadjust pre{\hypertarget{ref-Hastie1987}{}}%
 Hastie, Trevor, and Robert Tibshirani. 1987. {``{Generalized additive
 models: Some applications}.''} \emph{Journal of the American Statistical
@@ -1377,6 +1384,11 @@ Prediction}. Springer Science \& Business Media.
 Huang, Jian, Joel L Horowitz, and Fengrong Wei. 2010. {``Variable
 Selection in Nonparametric Additive Models.''} \emph{Annals of
 Statistics} 38 (4): 2282.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Lang2004}{}}%
+Lang, Stefan, and Andreas Brezger. 2004. {``Bayesian p-Splines.''}
+\emph{Journal of Computational and Graphical Statistics} 13 (1):
+183--212. \url{https://doi.org/10.1198/1061860043010}.
 
 \leavevmode\vadjust pre{\hypertarget{ref-Ravikumar2009}{}}%
 Ravikumar, Pradeep, John Lafferty, Han Liu, and Larry Wasserman. 2009.
