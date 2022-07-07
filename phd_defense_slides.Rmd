@@ -96,9 +96,10 @@ ggplot() +
   geom_point(aes(x, y)) +
   stat_smooth(aes(x, y, color="Linear"), method="lm", se = FALSE, size = 2) +
   stat_smooth(aes(x, y, color = "Spline"), method = "gam", se = FALSE, size = 2) +
-  geom_function(fun = ~2*sin(7*.x), group = "C", size = 2, mapping = aes(color = "Data")) +
+  # geom_function(fun = ~2*sin(7*.x), group = "C", size = 2, mapping = aes(color = "Data")) +
   scale_colour_manual("Functions: ",
-                      values=c("Linear" = "#66c2a5","Spline" = "#8da0cb", "Data" = "#fc8d62")) +
+                      values=c("Linear" = "#66c2a5","Spline" = "#8da0cb"#, "Data" = "#fc8d62"
+                               )) +
   theme_classic()+
   theme(legend.position = "top")
 ```
@@ -129,7 +130,7 @@ $$
 ### Problem: Function Smoothness
 
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
-How to decide $K$, the number of basis function ?
+How to mathematically define and estimate the smoothness of spline functions?
 \end{tcolorbox}
 
 <!-- In other words, how to balance function complexity and signal smoothness? -->
