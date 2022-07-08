@@ -327,7 +327,7 @@ link function, \(\phi\) is the dispersion parameter
 \begin{frame}{Problem: Function Smoothness}
 \protect\hypertarget{problem-function-smoothness}{}
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
-How to mathematically define and estimate the smoothness of spline models?
+How to mathematically define and estimate the smoothness of spline functions?
 \end{tcolorbox}
 
 \includegraphics{phd_defense_slides_files/figure-beamer/spline_overfitting-1.pdf}
@@ -398,8 +398,8 @@ How to choose $\lambda_i$ for $i = 1, \dots, p$?
     Random walk prior on b-spline bases with IG hyperprior (Lang and
     Brezger 2004)
   \item
-    Log-normal spline model for coefficient variance
-    (Baladandayuthapani, Mallick, and Carroll 2005)
+    Log-normal spline model for \(\tau^2_k\) (Baladandayuthapani,
+    Mallick, and Carroll 2005)
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -437,9 +437,9 @@ a characterizing structure
   Latent indicator \(\gamma\) follows a Bernoulli distribution with
   probability \(\theta\)
 \item
-  Spike density \(f_{spike}(x)\) concentrates around 0 for small effects
-\item
   Slab density \(f_{slab}(x)\) is a flat density for large effects
+\item
+  Spike density \(f_{spike}(x)\) concentrates around 0 for small effects
 \item
   Natural procedure to select variables via posterior distribution of
   \(\gamma\)
@@ -462,7 +462,7 @@ a characterizing structure
   \item
     Computation advantages via Expectation-Maximization (EM) algorithms
   \item
-    Seamless variable selection as coefficients shrinkage to 0
+    Seamless variable selection as coefficients shrink to 0
   \end{itemize}
 \item
   Group spike-and-slab LASSO prior
@@ -541,19 +541,19 @@ How to jointly model signal sparsity and function smoothness, while capable of b
 \begin{itemize}
 \item
   \textbf{Guo, B.}, Jaeger, B. C., Rahman, A. F., Long, D. L., Yi, N.
-  (2022). Spike-and-Slab least absolute shrinkage and selection operator
-  generalized additive models and scalable algorithms for
-  high-dimensional data analysis. \emph{Statistics in Medicine}. doi:
-  \url{https://doi.org/10.1002/sim.9483}
+  (2022). Spike-and-Slab LASSO generalized additive models and scalable
+  algorithms for high-dimensional data analysis. \emph{Statistics in
+  Medicine}. doi: \url{https://doi.org/10.1002/sim.9483}
 \item
   \textbf{Guo, B.}, Jaeger, B. C., Rahman, A. F., Long, D. L., Yi, N.
-  (2022). A scalable and flexible Cox proportional hazard model for
-  high-dimensional survival prediction and functional selection
+  (2022). A scalable and flexible Cox proportional hazards model for
+  high-dimensional survival prediction and functional selection.
   \emph{arXiv}. doi: \url{https://doi.org/10.48550/arXiv.2205.11600}
 \item
   \textbf{Guo, B.}, Yi, N. (2022). \texttt{BHAM}: An R Package to Fit
   Bayesian Hierarchical Additive Models for High-dimensional Data
-  Analysis \emph{Work in Progress}
+  Analysis. \emph{arXiv}.
+  \url{doi:/url\%7Bhttps://doi.org/10.48550/arXiv.2207.02348}\}
 \end{itemize}
 \end{frame}
 

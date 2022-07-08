@@ -130,7 +130,7 @@ $$
 ### Problem: Function Smoothness
 
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
-How to mathematically define and estimate the smoothness of spline models?
+How to mathematically define and estimate the smoothness of spline functions?
 \end{tcolorbox}
 
 <!-- In other words, how to balance function complexity and signal smoothness? -->
@@ -196,7 +196,7 @@ How to choose $\lambda_i$ for $i = 1, \dots, p$?
   $$
 * Adaptive smoothing
   * Random walk prior on b-spline bases with IG hyperprior [@Lang2004]
-  * Log-normal spline model for coefficient variance [@Baladandayuthapani2005]
+  * Log-normal spline model for $\tau^2_k$ [@Baladandayuthapani2005]
 
 ## Bayesian Variable Selection
 ### Problem: Functional Selection
@@ -218,9 +218,9 @@ Spike-and-slab priors are a family of mixture distributions that deploys a chara
   $$\beta|\gamma \sim (1-\gamma)f_{spike}(\beta) + \gamma f_{slab}(\beta)$$
   
   * Latent indicator $\gamma$ follows a Bernoulli distribution with probability $\theta$
-  * Spike density $f_{spike}(x)$ concentrates around 0 for small effects
   * Slab density $f_{slab}(x)$ is a flat density for large effects
-  
+  * Spike density $f_{spike}(x)$ concentrates around 0 for small effects
+
 * Natural procedure to select variables via posterior distribution of $\gamma$
 * Markov chain Monte Carlo is not compelling for high-dimensional data analysis
 
@@ -228,7 +228,7 @@ Spike-and-slab priors are a family of mixture distributions that deploys a chara
 * Double exponential distributions as the spike and slab distributions
   $$\beta|\gamma \sim (1-\gamma)DE(0, s_0) + \gamma DE(0, s_1), 0 < s_0 < s_1$$
   * Computation advantages via Expectation-Maximization (EM) algorithms
-  * Seamless variable selection as coefficients shrinkage to 0
+  * Seamless variable selection as coefficients shrink to 0
   
 * Group spike-and-slab LASSO prior
   * Structure among predictors, e.g. gene pathways, bases of a spline function
@@ -261,13 +261,13 @@ How to jointly model signal sparsity and function smoothness, while capable of b
 
 ### Projects
 
-* \textbf{Guo, B.}, Jaeger, B. C., Rahman, A. F., Long, D. L., Yi, N. (2022). Spike-and-Slab least absolute shrinkage and selection operator generalized additive models and scalable algorithms for high-dimensional data analysis. _Statistics in Medicine_. doi: \url{https://doi.org/10.1002/sim.9483}
+* \textbf{Guo, B.}, Jaeger, B. C., Rahman, A. F., Long, D. L., Yi, N. (2022). Spike-and-Slab LASSO generalized additive models and scalable algorithms for high-dimensional data analysis. _Statistics in Medicine_. doi: \url{https://doi.org/10.1002/sim.9483}
 
 
-* \textbf{Guo, B.}, Jaeger, B. C., Rahman, A. F., Long, D. L., Yi, N. (2022). A scalable and flexible Cox proportional hazard model for high-dimensional survival prediction and functional selection _arXiv_. doi: \url{https://doi.org/10.48550/arXiv.2205.11600}
+* \textbf{Guo, B.}, Jaeger, B. C., Rahman, A. F., Long, D. L., Yi, N. (2022). A scalable and flexible Cox proportional hazards model for high-dimensional survival prediction and functional selection. _arXiv_. doi: \url{https://doi.org/10.48550/arXiv.2205.11600}
 
 
-* \textbf{Guo, B.}, Yi, N. (2022). `BHAM`: An R Package to Fit Bayesian Hierarchical Additive Models for High-dimensional Data Analysis _Work in Progress_
+* \textbf{Guo, B.}, Yi, N. (2022). `BHAM`: An R Package to Fit Bayesian Hierarchical Additive Models for High-dimensional Data Analysis. _arXiv_. doi:\url{https://doi.org/10.48550/arXiv.2207.02348}
 
 ## Bayesian Hierarchical Additive Models
 ### Generalized Additive Model
