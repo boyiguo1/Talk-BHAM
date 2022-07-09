@@ -254,7 +254,7 @@ How to jointly model signal sparsity and function smoothness, while capable of b
 
 ### Objectives
 * To develop statistical models that improve curve interpolation and outcome prediction
-  * Local adaption of sparse penalty and smooth penalty
+  * Adaptive regularization that accounts for signal sparsity and function smoothness
   * Bi-level selection for linear and nonlinear effect
 * To develop a fast and scalable algorithm
 * To implement a user-friendly statistical software
@@ -267,29 +267,28 @@ How to jointly model signal sparsity and function smoothness, while capable of b
 * \textbf{Guo, B.}, Jaeger, B. C., Rahman, A. F., Long, D. L., Yi, N. (2022). A scalable and flexible Cox proportional hazards model for high-dimensional survival prediction and functional selection. _arXiv_. doi: \url{https://doi.org/10.48550/arXiv.2205.11600}
 
 
-* \textbf{Guo, B.}, Yi, N. (2022). `BHAM`: An R Package to Fit Bayesian Hierarchical Additive Models for High-dimensional Data Analysis. _arXiv_. doi:\url{https://doi.org/10.48550/arXiv.2207.02348}
+* \textbf{Guo, B.}, Yi, N. (2022). `BHAM`: An R Package to Fit Bayesian Hierarchical Additive Models for High-dimensional Data Analysis. _arXiv_. doi: \url{ https://doi.org/10.48550/arXiv.2207.02348}
 
 ## Bayesian Hierarchical Additive Models
 ### Generalized Additive Model
 Given the data $\{y_i, x_{i1}, \dots ,x_{ip}\}_{i=1}^n$ where $p >> n$
 \begin{align*}
-y_i &\overset{\text{i.i.d.}}{\sim} EF(\mu_i, \phi),\\
-g(\mu_i) &= \beta_0 + \sum\limits^p_{j=1}B_j(x_{ij}) , \quad i = 1, \dots, n.
+y_i &\overset{\text{i.i.d.}}{\sim} EF(\mu_i, \phi), \quad i = 1, \dots, n.\\
+g(\mu_i) &= \beta_0 + \sum\limits^p_{j=1}B_j(x_{ij}) = \beta_0 + \sum\limits^p_{j=1}\sum\limits_{k=1}^K \beta_{jk}b_{jk}(x_{ij}) = \beta_0 + \sum\limits^p_{j=1}\bs X_{ij}^T \bs \beta_j
 \end{align*}
+
+* Each spline function consists of $K$ bases
+* Identifiability constraint: $\mathbb{E}\left[B_j(X)\right] = 0, j=1,\dots, p$
 
 
 
 ### Spline Function Reparameterization
-* Smoothing penalty from smoothing spline regression [@Wood2017]
-$$
-\lambda_j \int B^{\prime\prime}_j(x)dx = \lambda_j \bs \beta_j^T \bs S_j \bs \beta_j,
-$$
-where $S_j$ is a known smoothing penalty matrix.
+* Smoothing penalty $\lambda \bs \beta^T \bs S \bs \beta$
+  * $\bs S$ is symmetric and positive semi-definite
+  * $\bs S = \bm U \bm D \bm U^T$ via eigendecomposing
 
-* Isolate the linear and nonlinear components via eigendecomposing $S_j$
-  <!-- * $\bm S = \bm U \bm D \bm U^T$ -->
-  <!-- * $\bm U \equiv [\bm U^\tp : \bm U^0]$ and $\bm D \equiv [\bm D^\tp : \bm 0]$ -->
-   $$\bm X \bm \beta = X^{0} \beta + \bs X^\tp\beta^\tp$$
+* Isolate the linear and nonlinear components
+   $$\bm X^T \bm \beta = (\bm X^T \bm U) (\bm U^T \bm \beta)= X^{0} \beta + \bs X^\tp \bs \beta^\tp$$
 
 * Benefits
   * Motivate bi-level selection
@@ -298,17 +297,30 @@ where $S_j$ is a known smoothing penalty matrix.
 
 ### Two-part Spike-and-slab LASSO (SSL) Prior
 
-* SSL prior for the linear coefficient and group SSL priors for nonlinear coefficients
+* SSL prior for the linear coefficient and modified group SSL priors for nonlinear coefficients
 \begin{align*}
 \beta_{j} |\gamma_{j},s_0,s_1 &\sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1) \\
-\beta^\tp_{jk} | \gamma^\tp_{j},s_0,s_1 &\simiid DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1), k = 1, \dots, K_j
+\beta^\tp_{jk} | \gamma^\tp_{j},s_0,s_1 &\simiid DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1), k = 1, \dots, K-1
 \end{align*}
-* Effect hierarchy enforced latent inclusion indicators $\gamma_j$ and $\gamma^\tp_{j}$ for bi-level selection
+
+  * $\gamma_{j}$ controls the inclusion of linear component
+  * $\gamma_{j}^\tp$ controls the inclusion of nonlinear component
+
+### Effect Hierarchy
+
+* _Effect hierarchy_ assumes lower-order effects are more likely to be active than higher-order effects
+
+* Structured prior on latent inclusion indicators $\gamma_j$ and $\gamma^\tp_{j}$
 $$
 \gamma_{j} | \theta_j \sim Bin(\gamma_{j}|1, \theta_j),\quad
-\gamma_{j}^\tp | \bg{\gamma_{j}}, \theta_j \sim Bin(1, \bg{\gamma_{j}}\theta_j),
+\gamma_{j}^\tp | \gamma_{j}, \theta_j \sim Bin(1, \gamma_{j}\theta_j),
 $$
-* Local adaptivity of signal sparsity and function smoothness
+  * Simplification via analytic integration
+  $$
+  \gamma_{j}^\tp | \theta_j \sim Bin(1, \theta_j^2),
+  $$
+
+* Adaptive shrinkage
 $$
 \theta_j \sim \text{Beta}(a,b)
 $$
@@ -330,7 +342,7 @@ background/.style={rectangle, fill=gray!10,inner sep=0.2cm, rounded corners=5mm}
   \node (linearBeta) [outCome] { $\beta_j \sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1)$};\\
 };
 \matrix (penPrior) [right = 2cm of linearPrior, matrix of nodes, column sep = 0mm, row sep = 0.7cm] {
-  \node (penGamma) [outCome] { $\gamma_{j}^\tp \sim Bin(1, \bg{\gamma_{j}}\theta_j)$ };\\
+  \node (penGamma) [outCome] { $\gamma_{j}^\tp \sim Bin(1, \gamma_{j}\theta_j)$ };\\
   \node (penBeta) [outCome] { $\beta_{jk}^\tp \sim  DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1)$};\\
 };
 
@@ -345,7 +357,7 @@ background/.style={rectangle, fill=gray!10,inner sep=0.2cm, rounded corners=5mm}
 \draw[->] (Theta) -- (penGamma);
 \draw[->] (linearGamma) -- (linearBeta) ;
 \draw[->] (penGamma) -- (penBeta);
-\draw[->, draw = red] (linearGamma) -- (penGamma);
+\draw[->] (linearGamma) -- (penGamma);
 \draw[->] (ab) -- (Theta);
 \draw[->] (s) -- (linearBeta) ;
 \draw[->] (s) -- (penBeta);
@@ -476,7 +488,7 @@ $$
 * Effect hierarchy enforced latent inclusion indicators $\gamma_j$ and $\gamma^\tp_{j}$ for bi-level selection
 $$
 \gamma_{j} | \theta_j \sim Bin(\gamma_{j}|1, \theta_j),\quad
-\gamma_{j}^\tp | \bg{\gamma_{j}}, \theta_j \sim Bin(1, \bg{\gamma_{j}}\theta_j),
+\gamma_{j}^\tp | \gamma_{j}, \theta_j \sim Bin(1, \gamma_{j}\theta_j),
 $$
 * Local adaptivity of signal sparsity and function smoothness
 $$
@@ -576,18 +588,19 @@ $$
   - Make prediction data for splines `make_predict_dat`
   - Plot spline functions via `plot_smooth_term`
 
-# Future Research
+# Conclusion 
 
-## Modeling Interactions
-### Varying coefficient models 
+## Future Research
+### Varying Coefficient Models 
   * Assume the coefficient of a variable $X_j$ is a function of a covariate $Z_j$
     * linear model: $\beta(Z_j) = \beta$
     * VC model: $\beta(Z_j) = B(Z_j)$
   * Replace each spline function $B(z_{ij})$ with $B(z_{ij})x_{ij}\equiv \bs (x_{ij}\bs Z_{ij}^T)\bs \beta_j$
   * Model fitting with EM-Coordinate Descent
+  * Nonlinear interaction of a continuous variable and a categorical variable
   
 \begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Question]
-  Can $Z_j$ be continuous? Is it possible to have a more flexible model? 
+  How to model nonlinear interaction of two continuous variables?
 \end{tcolorbox}
 
 ### Smooth Surface Fitting
@@ -617,8 +630,12 @@ $$
 
 Spike-and-slab LASSO prior motivates a seamless process of variable/functional selection and a scalable optimization-based model fitting algorithm
 
-# Conclusion 
 
+## Q & A
+
+> TODO (Audience): Ask questions here
+
+## Conclusion
 * Identify challenges in high-dimensional GAM with spline functions
   * Balance between signal sparsity and function smoothness
   * Bi-level selection to automatically detect linear and nonlinear effects
@@ -629,36 +646,44 @@ Spike-and-slab LASSO prior motivates a seamless process of variable/functional s
 * Future Research
   * Extension of spike-and-slab LASSO prior in structured additive model
 
-## Acknowledgement
+
+### Acknowledgement
 
 I would like to thank
 
 ::: columns
 :::: column
+* My parents and girlfriend
 * Dissertation Committee
 * Biostatistics Department
   * Faculty
   * Staff
   * Students
-* School of Public Health
-  * Friends
-  * PHSA
 ::::
 :::: column
 * REGARDS Research Group
   * PIs
   * Analytic Team
   * Collaborators
-
+* School of Public Health
+  * Friends
+* Public Health Student Association
 * Graduate Student Government
 ::::
 :::
 
 
 
-<!-- ## Advocacy -->
-<!-- -a -->
-<!-- -b -->
-<!-- -c -->
+## Advocacy
+\begin{figure}
+\centering
+\includegraphics[width=10cm]{Mentors_VS_Policies.jpg}
+\end{figure}
+
+### Advocacy
+\begin{figure}
+\centering
+\includegraphics[width=10cm]{all_helps.jpg}
+\end{figure}
 
 # References {.allowframebreaks}
