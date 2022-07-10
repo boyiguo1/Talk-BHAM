@@ -214,7 +214,7 @@ _Bi-level selection_ is the procedure that simultaneously addresses the two ques
 
 
 ### Spike-and-Slab Priors
-Spike-and-slab priors are a family of mixture distributions that deploys a characterizing structure
+Spike-and-slab priors are a family of mixture distributions that employs a characterizing structure
   $$\beta|\gamma \sim (1-\gamma)f_{spike}(\beta) + \gamma f_{slab}(\beta)$$
   
   * Latent indicator $\gamma$ follows a Bernoulli distribution with probability $\theta$
@@ -242,7 +242,7 @@ How to jointly model signal sparsity and function smoothness, while capable of b
 \end{tcolorbox}
 
 * Excess shrinkage due to negligence of smooth penalty
-    * Group lasso penalty [@Ravikumar2009; @Huang2010], group SCAD penalty [@Wang2007; @Xue2009]
+    * Group LASSO penalty [@Ravikumar2009; @Huang2010], group SCAD penalty [@Wang2007; @Xue2009]
     <!-- * Global penalty VS adaptive penalty -->
 
 * All-in-all-out selection
@@ -310,7 +310,7 @@ g(\mu_i) &= \beta_0 + \sum\limits^p_{j=1}B_j(x_{ij}) = \beta_0 + \sum\limits^p_{
 
 * _Effect hierarchy_ assumes lower-order effects are more likely to be active than higher-order effects
 
-* Structured prior on latent inclusion indicators $\gamma_j$ and $\gamma^\tp_{j}$
+* Structured prior on latent indicators $\gamma_j$ and $\gamma^\tp_{j}$
 $$
 \gamma_{j} | \theta_j \sim Bin(\gamma_{j}|1, \theta_j),\quad
 \gamma_{j}^\tp | \gamma_{j}, \theta_j \sim Bin(1, \gamma_{j}\theta_j),
@@ -389,7 +389,7 @@ We are interested in estimating $\Theta = \{\bm \beta, \bm \theta, \phi\}$ using
   * Maximize two  parts of the objective function independently
   
 * Previous applications in high-dimensional data analysis
-  * EMVS [@Rockova2014a], Spike-and-slab lasso [@Rockova2018]
+  * EMVS [@Rockova2014a], Spike-and-slab LASSO [@Rockova2018]
   * BhGLM [@Yi2019]
 
 
@@ -429,7 +429,7 @@ $$Q_2 \equiv Q_2(\bs\gamma,\bs\theta) = \sum\limits_{j=1}^{p} \left[ (\gamma_j+\
 * $n_{train} = 500$, $n_{test}=1000$
 * $p=4, 10, 50, 200$
 $$
-\mu = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
+g(\mu) = 5 \sin(2\pi X_1) - 4 \cos(2\pi X_2 -0.5) + 6(X_3-0.5) - 5(X_4^2 -0.3),
 $$
 
 * $f_j(x_j) = 0$ for $j = 5, \dots, p$.
@@ -447,7 +447,7 @@ $$
   * spikeSlabGAM [@Scheipl2012]
 
 * Metrics
-  * Prediction: $R^2$ for continuous outcomes, out-of-sample AUC for binary outcomes
+  * Prediction: $R^2$ for continuous outcomes, AUC for binary outcomes
   * Variable Selection: positive predictive value (precision), true positive rate (recall), and Matthews correlation coefficient (MCC)
   
 ### Prediction Performance
@@ -463,6 +463,31 @@ $$
 * BHAM and spikeSlabGAM have trade-offs for bi-level selection
   * spikeSlabGAM tends to select either linear or nonlinear components of the function
   * BHAM is more likely to select both parts
+
+### Metabolites Data Applications
+::: columns
+:::: column
+* Emory Cardiovascular Biobank
+  * Three-year all-cause mortality
+  * p = 200 and N = 454
+  * 5-knot cubic spline
+::::
+
+:::: column
+* Weight Loss Maintenance Cohort
+  * Standardized percent change in insulin resistance
+  * p = 483 and N = 237
+  * 5-knot cubic spline
+::::
+:::
+
+* Compared to SB-GAM, BHAM has better prediction performance and substantial computation advantage
+
+### Emory Cardiovascular Biobank
+\begin{figure}
+\centering
+\includegraphics[height=6cm]{ECB_plot_wide.pdf}
+\end{figure}
 
 ## Additive Cox Proportional Hazards Model
 
@@ -538,10 +563,10 @@ $$
 * High dimensional setting:
   * BHAM performs better than COSSO models as p increases and more censoring events
 
-### Emipirical Performance: Emory Cardiovascular Biobank
+### Emory Cardiovascular Biobank
 ::: columns
 :::: column
-* predicting all-cause mortality among patents undergoing cardiac catheterization
+* All-cause mortality among patents undergoing cardiac catheterization
 * Sample size N=454 and number of features p=200
 * 5-knot cubic spline
 ::::

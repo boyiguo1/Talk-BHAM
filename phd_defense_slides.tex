@@ -428,7 +428,7 @@ the two questions above
 
 \begin{frame}{Spike-and-Slab Priors}
 \protect\hypertarget{spike-and-slab-priors}{}
-Spike-and-slab priors are a family of mixture distributions that deploys
+Spike-and-slab priors are a family of mixture distributions that employs
 a characterizing structure
 \[\beta|\gamma \sim (1-\gamma)f_{spike}(\beta) + \gamma f_{slab}(\beta)\]
 
@@ -493,7 +493,7 @@ How to jointly model signal sparsity and function smoothness, while capable of b
   \begin{itemize}
   \tightlist
   \item
-    Group lasso penalty (Ravikumar et al. 2009; Huang, Horowitz, and Wei
+    Group LASSO penalty (Ravikumar et al. 2009; Huang, Horowitz, and Wei
     2010), group SCAD penalty (Wang, Chen, and Li 2007; Xue 2009)
   \end{itemize}
 \item
@@ -639,7 +639,7 @@ g(\mu_i) &= \beta_0 + \sum\limits^p_{j=1}B_j(x_{ij}) = \beta_0 + \sum\limits^p_{
   \emph{Effect hierarchy} assumes lower-order effects are more likely to
   be active than higher-order effects
 \item
-  Structured prior on latent inclusion indicators \(\gamma_j\) and
+  Structured prior on latent indicators \(\gamma_j\) and
   \(\gamma^\tp_{j}\) \[
   \gamma_{j} | \theta_j \sim Bin(\gamma_{j}|1, \theta_j),\quad
   \gamma_{j}^\tp | \gamma_{j}, \theta_j \sim Bin(1, \gamma_{j}\theta_j),
@@ -743,7 +743,7 @@ algorithm for scalability purpose
   \begin{itemize}
   \tightlist
   \item
-    EMVS (Ročková and George 2014), Spike-and-slab lasso (Ročková and
+    EMVS (Ročková and George 2014), Spike-and-slab LASSO (Ročková and
     George 2018)
   \item
     BhGLM (Yi et al. 2019)
@@ -838,7 +838,7 @@ over all possible values of \(\bm \gamma\)
   \(n_{train} = 500\), \(n_{test}=1000\)
 \item
   \(p=4, 10, 50, 200\) \[
-  \mu = 5 \sin(2\pi x_1) - 4 \cos(2\pi x_2 -0.5) + 6(x_3-0.5) - 5(x_4^2 -0.3),
+  g(\mu) = 5 \sin(2\pi X_1) - 4 \cos(2\pi X_2 -0.5) + 6(X_3-0.5) - 5(X_4^2 -0.3),
   \]
 \item
   \(f_j(x_j) = 0\) for \(j = 5, \dots, p\).
@@ -879,8 +879,7 @@ over all possible values of \(\bm \gamma\)
   \begin{itemize}
   \tightlist
   \item
-    Prediction: \(R^2\) for continuous outcomes, out-of-sample AUC for
-    binary outcomes
+    Prediction: \(R^2\) for continuous outcomes, AUC for binary outcomes
   \item
     Variable Selection: positive predictive value (precision), true
     positive rate (recall), and Matthews correlation coefficient (MCC)
@@ -924,6 +923,62 @@ over all possible values of \(\bm \gamma\)
     BHAM is more likely to select both parts
   \end{itemize}
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Metabolites Data Applications}
+\protect\hypertarget{metabolites-data-applications}{}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+\tightlist
+\item
+  Emory Cardiovascular Biobank
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Three-year all-cause mortality
+  \item
+    p = 200 and N = 454
+  \item
+    5-knot cubic spline
+  \end{itemize}
+\end{itemize}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+\tightlist
+\item
+  Weight Loss Maintenance Cohort
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Standardized percent change in insulin resistance
+  \item
+    p = 483 and N = 237
+  \item
+    5-knot cubic spline
+  \end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+
+\begin{itemize}
+\tightlist
+\item
+  Compared to SB-GAM, BHAM has better prediction performance and
+  substantial computation advantage
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Emory Cardiovascular Biobank}
+\protect\hypertarget{emory-cardiovascular-biobank}{}
+\begin{figure}
+\centering
+\includegraphics[height=6cm]{ECB_plot_wide.pdf}
+\end{figure}
 \end{frame}
 
 \hypertarget{additive-cox-proportional-hazards-model}{%
@@ -1100,15 +1155,14 @@ Model}\label{additive-cox-proportional-hazards-model}}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Emipirical Performance: Emory Cardiovascular Biobank}
-\protect\hypertarget{emipirical-performance-emory-cardiovascular-biobank}{}
+\begin{frame}{Emory Cardiovascular Biobank}
+\protect\hypertarget{emory-cardiovascular-biobank-1}{}
 \begin{columns}[T]
 \begin{column}{0.48\textwidth}
 \begin{itemize}
 \tightlist
 \item
-  predicting all-cause mortality among patents undergoing cardiac
-  catheterization
+  All-cause mortality among patents undergoing cardiac catheterization
 \item
   Sample size N=454 and number of features p=200
 \item
@@ -1215,7 +1269,7 @@ Model}\label{additive-cox-proportional-hazards-model}}
 \hypertarget{future-research}{%
 \subsection{Future Research}\label{future-research}}
 
-\begin{frame}{Varying coefficient models}
+\begin{frame}{Varying Coefficient Models}
 \protect\hypertarget{varying-coefficient-models}{}
 \begin{itemize}
 \tightlist
