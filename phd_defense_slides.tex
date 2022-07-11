@@ -591,7 +591,7 @@ g(\mu_i) &= \beta_0 + \sum\limits^p_{j=1}B_j(x_{ij}) = \beta_0 + \sum\limits^p_{
   \item
     \(\bs S\) is symmetric and positive semi-definite
   \item
-    \(\bs S = \bm U \bm D \bm U^T\) via eigendecomposing
+    \(\bs S = \bm U \bm D \bm U^T\) via eigendecompostion
   \end{itemize}
 \item
   Isolate the linear and nonlinear components
@@ -760,7 +760,7 @@ over all possible values of \(\bm \gamma\)
 \begin{itemize}
 \item
   L\(_1\)-penalized likelihood function of \(\bs \beta, \phi\)
-  \[Q_1 \equiv Q_1(\bs \beta, \phi) = \log f(\textbf{y}|\bs \beta, \phi) + \sum\limits_{j=1}^p\left[\log f(\beta_j|\gamma_j)+\sum\limits_{k=1}^{K_j} \log f(\beta^{\tp}_{jk}|\gamma^{\tp}_{jk})\right]\]
+  \[Q_1 \equiv Q_1(\bs \beta, \phi) = \log f(\textbf{y}|\bs \beta, \phi) + \sum\limits_{j=1}^p\left[\log f(\beta_j|\gamma_j)+\sum\limits_{k=1}^{K_j} \log f(\beta^{\tp}_{jk}|\gamma^{\tp}_{j})\right]\]
 \item
   Posterior density of \(\theta\) given data points \(\gamma\)s
   \[Q_2 \equiv Q_2(\bs\gamma,\bs\theta) = \sum\limits_{j=1}^{p} \left[ (\gamma_j+\gamma_{j}^{\tp})\log \theta_j + (2-\gamma_j-\gamma_{j}^{\tp}) \log (1-\theta_j)\right] +  \sum\limits_{j=1}^{p}\log f(\theta_j).\]
@@ -917,8 +917,8 @@ over all possible values of \(\bm \gamma\)
   \begin{itemize}
   \tightlist
   \item
-    spikeSlabGAM tends to select either linear or nonlinear components
-    of the function
+    spikeSlabGAM tends to select only the nonlinear component of the
+    function
   \item
     BHAM is more likely to select both parts
   \end{itemize}
@@ -1341,15 +1341,6 @@ variable/functional selection and a scalable optimization-based model
 fitting algorithm
 \end{frame}
 
-\hypertarget{q-a}{%
-\subsection{Q \& A}\label{q-a}}
-
-\begin{frame}{Q \& A}
-\begin{quote}
-TODO (Audience): Ask questions here
-\end{quote}
-\end{frame}
-
 \hypertarget{conclusion-1}{%
 \subsection{Conclusion}\label{conclusion-1}}
 
@@ -1466,6 +1457,15 @@ I would like to thank
 \centering
 \includegraphics[width=10cm]{all_helps.jpg}
 \end{figure}
+\end{frame}
+
+\hypertarget{q-a}{%
+\subsection{Q \& A}\label{q-a}}
+
+\begin{frame}{Q \& A}
+\begin{quote}
+TODO (Audience): Ask questions here
+\end{quote}
 \end{frame}
 
 \hypertarget{references}{%
