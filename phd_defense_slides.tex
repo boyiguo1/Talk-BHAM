@@ -214,8 +214,8 @@ University of Alabama at Birmingham}
 \end{itemize}
 \end{frame}
 
-\hypertarget{outline}{%
-\section*{Outline}\label{outline}}
+% \hypertarget{outline}{%
+% \section*{Outline}\label{outline}}
 
 \begin{frame}[fragile]{Outline}
 \begin{itemize}
@@ -252,9 +252,9 @@ University of Alabama at Birmingham}
   \item
     Future Research
   \item
-    Questions \& Answers
-  \item
     Closing Statement \& Acknowledgment
+  \item
+    Questions \& Answers
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -262,8 +262,8 @@ University of Alabama at Birmingham}
 \hypertarget{background}{%
 \section{Background}\label{background}}
 
-\hypertarget{spline-model-development}{%
-\subsection{Spline Model Development}\label{spline-model-development}}
+% \hypertarget{spline-model-development}{%
+% \subsection{Spline Model Development}\label{spline-model-development}}
 
 \begin{frame}{Spline Model Development}
 \begin{quote}
@@ -308,7 +308,7 @@ basis and b-spline basis. (Simon N. Wood 2017)
 \textbf{Generalized additive model} (Hastie and Tibshirani 1987) is
 expressed \begin{align*}
   y_i &\simiid EF(\mu_i, \phi), \quad i = 1, \dots, n\\
-  g(\mu_i) &= \beta_0 + B(x_i) = \beta_0 + \bs X_i^T \bs \beta ,  \quad \mathbb{E}\left[B(X)\right] = 0 
+  g(\mu_i) &= \beta_0 + B(x_i) = \beta_0 + \bs X_i^T \bs \beta ,  \quad \mathbb{E}\left[B(X)\right] = 0
 \end{align*} where \(B(x_i)\) is the spline function, \(g(\cdot)\) is a
 link function, \(\phi\) is the dispersion parameter
 
@@ -334,7 +334,8 @@ How to mathematically define and estimate the smoothness of spline functions?
 \end{frame}
 
 \hypertarget{bayesian-regularization}{%
-\subsection{Bayesian Regularization}\label{bayesian-regularization}}
+% \subsection*{Bayesian Regularization}
+\label{bayesian-regularization}}
 
 \begin{frame}{Smoothing Spline Model}
 \protect\hypertarget{smoothing-spline-model}{}
@@ -404,9 +405,9 @@ How to choose $\lambda_i$ for $i = 1, \dots, p$?
 \end{itemize}
 \end{frame}
 
-\hypertarget{bayesian-variable-selection}{%
-\subsection{Bayesian Variable
-Selection}\label{bayesian-variable-selection}}
+% \hypertarget{bayesian-variable-selection}{%
+% \subsection{Bayesian Variable
+% Selection}\label{bayesian-variable-selection}}
 
 \begin{frame}{Problem: Functional Selection}
 \protect\hypertarget{problem-functional-selection}{}
@@ -1234,8 +1235,6 @@ Model}\label{additive-cox-proportional-hazards-model}}
     Argument \texttt{family} for generalized and survival outcomes
   \item
     Argument \texttt{ss} for spike-and-slab LASSO scale parameters
-  \item
-    Argument \texttt{group} for group structures among predictors
   \end{itemize}
 \item
   Model tuning via \texttt{tune}
@@ -1341,8 +1340,8 @@ variable/functional selection and a scalable optimization-based model
 fitting algorithm
 \end{frame}
 
-\hypertarget{conclusion-1}{%
-\subsection{Conclusion}\label{conclusion-1}}
+% \hypertarget{conclusion-1}{%
+% \subsection{Conclusion}\label{conclusion-1}}
 
 \begin{frame}[fragile]{Conclusion}
 \begin{itemize}
@@ -1441,8 +1440,8 @@ I would like to thank
 \end{columns}
 \end{frame}
 
-\hypertarget{advocacy}{%
-\subsection{Advocacy}\label{advocacy}}
+% \hypertarget{advocacy}{%
+% \subsection{Advocacy}\label{advocacy}}
 
 \begin{frame}{Advocacy}
 \begin{figure}
@@ -1464,12 +1463,12 @@ I would like to thank
 
 \begin{frame}{Q \& A}
 \begin{quote}
-TODO (Audience): Ask questions here
+TODO (Audience): Feel free to ask questions
 \end{quote}
 \end{frame}
 
-\hypertarget{references}{%
-\section*{References}\label{references}}
+% \hypertarget{references}{%
+% \section*{References}\label{references}}
 \addcontentsline{toc}{section}{References}
 
 \begin{frame}[allowframebreaks]{References}
