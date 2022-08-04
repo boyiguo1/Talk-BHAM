@@ -54,13 +54,13 @@ $b_k(x)$ are the _basis functions_, possibly truncated power basis and b-spline 
 
 ## Function Smoothing
 
-* Smoothing penalty $\lambda \int B^{''}(X)^2dx = \lambda \bs \beta^T \bs S \bs\beta$
+* Smoothing penalty $\text{pen}_\lambda(B_j(X_j)) = \lambda \int B^{''}(X)^2dx = \lambda \bs \beta^T \bs S \bs\beta$
   * The smoothing penalty matrix $\bs S$ is known given $\bs X$
   * $\bs S$ is symmetric and positive semi-definite
 
 * Penalized Partial Likelihood Function
 $$
-\hat h_0(t_i|\beta) = d_i/\sum\limits_{i^\prime \in R(t_i)} exp(X_{i^\prime}\beta).
+pl(\bs \beta) = \sum\limits^n_{i=1}d_i\log\frac{\exp{(\bs \beta^T\bs x_i )}}{\sum_{{i^\prime} \in R(t_i)} \exp(\bs \beta^T bs x_{i^\prime})} - \sum\limits_{j=1}^p \text{pen}_\lambda(B_j(X_j)),
 $$
     
   * The smoothing parameter $\lambda$ is a tuning parameter, selected via cross-validation
@@ -70,8 +70,12 @@ $$
 
 Primary Challenges:
 
-* Jointly model signal sparsity versus function smoothness 
+* Jointly model signal sparsity versus function smoothness
+  * Smooth penalty only overfits the model
+  * Sparsity penalty only overshinks the coefficients
+  * Damage predictive performance
 * Adaptive shrinkage
+  * Global shrinkage assumes similar function smoothness
 * Bi-level selection that simultaneously answers
   * if a variable is predictive to the outcome, $B_j(X_j) = 0$
   * if a variable has a nonlinear relationship with the outcome, $B_j(X_j) = \beta_j X_j$
@@ -90,10 +94,10 @@ Primary Challenges:
 
 ## Two-part Spike-and-slab LASSO (SSL) Prior
 
-Follow xxx, a spline function $B(X) = \bm X^T \bm \beta$ can be decomposed to linear and nonlinear components with respect to the smoothing penalty matrix $S$
+Follow @Marra2011, a spline function $B(X) = \bm X^T \bm \beta$ can be decomposed to linear and nonlinear components with respect to the smoothing penalty matrix $S$
 $$\bm X^T \bm \beta = X^{0} \beta + \bs X^\tp \bs \beta^\tp$$
    
-* Proposed spike-and-slab LASSO prior <!-- * SSL prior for the linear coefficient and modified group SSL priors for nonlinear coefficients -->
+Two-part spike-and-slab LASSO prior
 \begin{align*}
 \beta_{j} |\gamma_{j},s_0,s_1 &\sim DE(0,(1-\gamma_{j}) s_0 + \gamma_{j} s_1) \\
 \beta^\tp_{jk} | \gamma^\tp_{j},s_0,s_1 &\simiid DE(0,(1-\gamma^\tp_{j}) s_0 + \gamma^\tp_{j} s_1), k = 1, \dots, K-1
@@ -124,66 +128,32 @@ $$
 
 ## EM-Cooridante Descent Algrithm
 
-We are interested in estimating $\Theta = \{\bm \beta, \bm \theta, \phi\}$ using optimization based algorithm for scalability purpose
+We are interested in estimating $\Theta = \{\bm \beta, \bm \theta\}$ using optimization based algorithm for scalability purpose
 
-* Basic Ideas
   * Treat $\gamma$s as the "missing data" in the EM procedure
-  * Quantify the expectation of log posterior density function of $\Theta$ with respect to $\gamma$ conditioning on $\Theta^{(t-1)}$
-  * Maximize two  parts of the objective function independently
-
-## Decomposition of Objective Function
-We aim to maximize the log posterior density of $\Theta$ by averaging over all possible values of $\bm \gamma$
-$$ \log f(\Theta, \bs \gamma| \textbf{y}, \textbf{X}) = Q_1(\bs \beta, \phi) + Q_2 (\bs \gamma,\bs \theta),$$
-
-* L$_1$-penalized likelihood function of $\bs \beta, \phi$
-$$Q_1 \equiv Q_1(\bs \beta, \phi) = \log f(\textbf{y}|\bs \beta, \phi) + \sum\limits_{j=1}^p\left[\log f(\beta_j|\gamma_j)+\sum\limits_{k=1}^{K_j} \log f(\beta^{\tp}_{jk}|\gamma^{\tp}_{j})\right]$$
-* Posterior density of $\theta$ given data points $\gamma$s
-$$Q_2 \equiv Q_2(\bs\gamma,\bs\theta) = \sum\limits_{j=1}^{p} \left[ (\gamma_j+\gamma_{j}^{\tp})\log \theta_j + (2-\gamma_j-\gamma_{j}^{\tp}) \log (1-\theta_j)\right] +  \sum\limits_{j=1}^{p}\log f(\theta_j).$$
-
-* $Q_1$ and $Q_2$ are independent conditioning on $\gamma$s
-
-## Summary of EM-Coordinate Descent Algorithm
-* E-step
-  * Formulate $E_{\bm \gamma|\Theta^{(t)}}\left[Q(\Theta, \bm \gamma)\right] = E(Q_1) + E(Q_2)$
-    * $E(Q_1)$ is a $l_1$ penalized partial likelihood function of $\beta, \phi$
-    * $E(Q_2)$ is a posterior density of $\theta$ given $E(\gamma)$
-    * $E(Q_1)$ and $E(Q_2)$ are conditionally independent
-  * Calculate $E(\gamma_{j})$, $E(\gamma^\tp_{j})$ and the penalties parameters by Bayes' theorem
-* M-step: 
-  * Use Coordinate Descent to fit the penalized model in $E(Q_1)$ to update $\beta, \phi$ 
-  * Closed form calculation via $E(Q_2)$ to update $\theta$
+    * Construct the conditional expectation of the posterior density function
+  * Decompose the posterior density function to two pieces
+    * $L_1$ penalized partial likelihood function of $\beta$
+    * Posterior density function of $\theta$
+  * Maximize the two pieces independently
+    * Optimize $\beta$ with coordinate descent algorithm
+    * Optimize $\theta$ with beta-binomial conjugate relationship
 
 # Numeric Studies
 ## Simulation Study
 * $n_{train} = 500$, $n_{test}=1000$
 * $p=4, 10, 50, 100, 200$
 * Survival and censoring time follow Weibull distribution
-$$
-  \log \eta = (x_1 + 1)^2/5 + \exp (x_2 + 1)/25 + 3\text{sin} (x_3)/2 + (1.4x_4 + 0.5)/2
-$$
+  * Censoring rate is controlled at \{0.15, 0.3, 0.45\}
 
-* Censoring rate is controlled at \{0.15, 0.3, 0.45\}
-* Splines are constructed using 10 knots
-* 50 Iterations
+\centering
+\includegraphics[height = 4cm]{Cox_Figures/signal_horizontal.png}
 
-## Comparison & Metircs
-* Methods of comparison
-  * Proposed model BHAM
-  * Linear LASSO model as the benchmark
-  * mgcv [@Wood2004]
-  * COSSO [@Zhang2006GAM] and adaptive COSSO[@Storlie2011]
 
-* Metrics
-  * Out-of-sample deviance & Concordance
-  
 ## Prediction Performance
+\centering
+\includegraphics[width=1.0\textwidth, height=0.9\textheight]{Cox_Figures/sim_res}
 
-* Linear LASSO Model performs bad in general
-* Low dimensional settings:
-  * mgcv performs the best 
-  * BHAM performs as good as mgcv 
-* High dimensional setting:
-  * BHAM performs better than COSSO models as p increases and more censoring events
 
 ##  Emory Cardiovascular Biobank
 ::: columns
