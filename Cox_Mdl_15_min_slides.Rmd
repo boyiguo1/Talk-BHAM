@@ -152,7 +152,7 @@ We are interested in estimating $\Theta = \{\bm \beta, \bm \theta\}$ using optim
 
 ## Prediction Performance
 \centering
-\includegraphics[width=1.0\textwidth, height=0.9\textheight]{Cox_Figures/sim_res}
+\includegraphics[width=1.0\textwidth, height=0.85\textheight]{Cox_Figures/sim_res}
 
 
 ##  Emory Cardiovascular Biobank
